@@ -1,369 +1,764 @@
 import axios from 'axios';
 
-// Local list of registered users in memory for runtime state simulation
+// ─────────────────────────────────────────────────────────────────────────────
+// BASE CONFIG
+// Backend: Node.js Express @ http://localhost:5000
+// All endpoints prefixed with /api
+// ─────────────────────────────────────────────────────────────────────────────
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+  timeout: 10000,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// JWT TOKEN MANAGEMENT
+// ─────────────────────────────────────────────────────────────────────────────
+export const tokenManager = {
+  getAccessToken: () => localStorage.getItem('ksu_access_token'),
+  getRefreshToken: () => localStorage.getItem('ksu_refresh_token'),
+  setTokens: (access, refresh) => {
+    localStorage.setItem('ksu_access_token', access);
+    if (refresh) localStorage.setItem('ksu_refresh_token', refresh);
+  },
+  clearTokens: () => {
+    localStorage.removeItem('ksu_access_token');
+    localStorage.removeItem('ksu_refresh_token');
+  },
+};
+
+// Attach JWT to every request
+axiosInstance.interceptors.request.use((config) => {
+  const token = tokenManager.getAccessToken();
+  if (token) config.headers['Authorization'] = `Bearer ${token}`;
+  return config;
+});
+
+// Auto-refresh on 401
+axiosInstance.interceptors.response.use(
+  (res) => res,
+  async (err) => {
+    const original = err.config;
+    if (err.response?.status === 401 && !original._retry) {
+      original._retry = true;
+      try {
+        const refresh = tokenManager.getRefreshToken();
+        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { token: refresh });
+        tokenManager.setTokens(data.accessToken, data.refreshToken);
+        original.headers['Authorization'] = `Bearer ${data.accessToken}`;
+        return axiosInstance(original);
+      } catch {
+        tokenManager.clearTokens();
+        window.location.reload();
+      }
+    }
+    return Promise.reject(err);
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOCK DATA (fallback when backend is not running)
+// Used for demo/development mode when backend is unavailable
+// ─────────────────────────────────────────────────────────────────────────────
+const MOCK_MODE = true; // Set to false when backend is running
+
 export const REGISTERED_USERS = [
   {
-    username: "admin",
-    password: "password123",
-    nickname: "관리자 (데모)",
-    email: "admin@gloculture.edu",
-    preferredLanguage: "ko"
+    id: 'mock_001',
+    username: 'admin',
+    password: 'password123',
+    nickname: '관리자 (Admin)',
+    email: 'admin@ks.ac.kr',
+    role: 'admin',
+    preferredLanguage: 'ko',
   },
   {
-    username: "gloculture",
-    password: "password123",
-    nickname: "글로컬쳐 (데모)",
-    email: "snu_student@snu.ac.kr",
-    preferredLanguage: "en"
-  }
+    id: 'mock_002',
+    username: 'student1',
+    password: 'password123',
+    nickname: '경성 학생',
+    email: 'student1@ks.ac.kr',
+    role: 'student',
+    preferredLanguage: 'ko',
+  },
+  {
+    id: 'mock_003',
+    username: 'staff1',
+    password: 'password123',
+    nickname: '교직원 홍길동',
+    email: 'staff1@ks.ac.kr',
+    role: 'staff',
+    preferredLanguage: 'ko',
+  },
 ];
 
-// Mock DB for initial demo data (supports multiple languages)
+// Mock Posts (matching /api/posts schema)
 export const INITIAL_POSTS = [
   {
     id: 1,
-    category: "contest",
-    author: "익명 (작성자)",
-    authorId: "user_101",
-    isSelf: true, // Simulated logged-in user
-    time: "2시간 전",
-    title: "혹시 ICT 공모전 팀원 구하시는 분 계신가요?",
-    content: "이번 학기에 열리는 ICT 연합 대학생 공모전 나가려고 하는데, 프론트엔드 개발자 한 분과 디자이너 한 분 구합니다! 현재 백엔드 개발자 2명(저 포함) 확보된 상태입니다. 다국어 교류 동아리 활동 경험도 우대합니다. 관심 있으신 외국인 유학생분들도 대환영입니다! 같이 재밌게 개발하고 소통해요~",
+    category: 'contest',
+    author: '익명 (작성자)',
+    authorId: 'mock_001',
+    isSelf: true,
+    time: '2시간 전',
+    title: '혹시 ICT 공모전 팀원 구하시는 분 계신가요?',
+    content:
+      '이번 학기에 열리는 ICT 연합 대학생 공모전 나가려고 하는데, 프론트엔드 개발자 한 분과 디자이너 한 분 구합니다! 현재 백엔드 개발자 2명(저 포함) 확보된 상태입니다.',
     likes: 8,
     commentsCount: 3,
     liked: false,
-    lang: "ko",
-    translatedTitle: "Is anyone looking for an ICT contest teammate?",
-    translatedContent: "I'm planning to participate in the ICT United University Student Contest held this semester, and I'm looking for one frontend developer and one designer! Currently, two backend developers (including me) are secured. Experience in multi-language exchange clubs is also welcome. Foreign exchange students who are interested are also very welcome! Let's develop and communicate fun together~"
+    lang: 'ko',
+    translatedTitle: 'Is anyone looking for an ICT contest teammate?',
+    translatedContent:
+      "I'm planning to participate in the ICT United University Student Contest held this semester, and I'm looking for one frontend developer and one designer!",
   },
   {
     id: 2,
-    category: "exchange",
-    author: "Sarah Jones",
-    authorId: "user_202",
+    category: 'exchange',
+    author: 'Sarah Jones',
+    authorId: 'user_202',
     isSelf: false,
-    time: "3시간 전",
-    title: "Looking for language exchange buddies near the campus! 🇰🇷🇺🇸",
-    content: "Hey guys! I just arrived in Korea last week as an exchange student from the US. I really want to improve my Korean and can help you with English in return! We can grab some coffee or study together near the central library. Feel free to send me a direct message (DM) if you are interested!",
+    time: '3시간 전',
+    title: 'Looking for language exchange buddies near the campus! 🇰🇷🇺🇸',
+    content:
+      "Hey guys! I just arrived in Korea last week as an exchange student from the US. I really want to improve my Korean!",
     likes: 12,
     commentsCount: 2,
     liked: true,
-    lang: "en",
-    translatedTitle: "캠퍼스 근처에서 언어교환 할 친구를 찾고 있어요! 🇰🇷🇺🇸",
-    translatedContent: "안녕하세요 여러분! 저는 지난주에 미국에서 교환학생으로 한국에 온 사라라고 합니다. 한국어 실력을 정말 키우고 싶고, 보답으로 영어 공부를 도와드릴 수 있어요! 중앙도서관 근처에서 같이 커피를 마시거나 공부할 수 있습니다. 관심 있으시면 편하게 쪽지(DM) 주세요!"
+    lang: 'en',
+    translatedTitle: '캠퍼스 근처에서 언어교환 할 친구를 찾고 있어요! 🇰🇷🇺🇸',
+    translatedContent:
+      '안녕하세요 여러분! 저는 미국에서 교환학생으로 한국에 온 사라입니다. 한국어 실력을 키우고 싶어요!',
   },
   {
     id: 3,
-    category: "free",
-    author: "익명 2",
-    authorId: "user_303",
+    category: 'free',
+    author: '익명 2',
+    authorId: 'user_303',
     isSelf: false,
-    time: "5시간 전",
-    title: "有人想一起练习韩语口语吗？🇨🇳🇰🇷",
-    content: "大家好！我是刚来半年的留学生，目前在准备TOPIK 5级，但是口语还是有点弱。希望能找一个韩国朋友或者其他国家的留学生一起练习口语。我们可以互相学习，我也可以教你中文！有兴趣的请私信我哦~",
+    time: '5시간 전',
+    title: '有人想一起练习韩语口语吗？🇨🇳🇰🇷',
+    content:
+      '大家好！我是刚来半年的留学生，目前在准备TOPIK 5级，但是口语还是有点弱。',
     likes: 5,
     commentsCount: 2,
     liked: false,
-    lang: "zh",
-    translatedTitle: "같이 한국어 말하기 연습하실 분 계신가요? 🇨🇳🇰🇷",
-    translatedContent: "안녕하세요 여러분! 저는 한국에 온 지 반년 된 유학생입니다. 현재 TOPIK 5급을 준비하고 있지만 말하기가 아직 좀 약합니다. 한국인 친구나 다른 나라 유학생들과 함께 말하기 연습을 하고 싶습니다. 서로 배울 수 있고, 저도 중국어를 가르쳐 드릴 수 있어요! 관심 있으신 분은 쪽지 주세요~"
+    lang: 'zh',
+    translatedTitle: '같이 한국어 말하기 연습하실 분 계신가요? 🇨🇳🇰🇷',
+    translatedContent:
+      '안녕하세요! 저는 한국에 온 지 반년 된 유학생입니다. 현재 TOPIK 5급을 준비 중입니다.',
   },
   {
     id: 4,
-    category: "exchange",
-    author: "Nguyen Min",
-    authorId: "user_404",
+    category: 'exchange',
+    author: 'Nguyen Min',
+    authorId: 'user_404',
     isSelf: false,
-    time: "1일 전",
-    title: "Tìm quán ăn Việt Nam ngon quanh trường 🍜",
-    content: "Chào mọi người, mình mới đến Hàn Quốc được 2 tuần. Cho mình hỏi quanh trường có quán ăn Việt Nam nào ngon và chuẩn vị không ạ? Thèm phở quá mà chưa biết đi đâu ăn ngon. Cảm ơn mọi người nhiều!",
+    time: '1일 전',
+    title: 'Tìm quán ăn Việt Nam ngon quanh trường 🍜',
+    content:
+      'Chào mọi người, mình mới đến Hàn Quốc được 2 tuần. Cho mình hỏi quanh trường có quán ăn Việt Nam nào ngon không ạ?',
     likes: 15,
     commentsCount: 1,
     liked: false,
-    lang: "vi",
-    translatedTitle: "학교 주변 맛있는 베트남 음식점 찾아요 🍜",
-    translatedContent: "안녕하세요 여러분, 한국에 온 지 2주 되었습니다. 학교 주변에 맛있고 현지 맛을 내는 베트남 음식점이 있나요? 쌀국수가 너무 먹고 싶은데 어디가 맛있는지 모르겠네요. 다들 정말 감사합니다!"
-  }
+    lang: 'vi',
+    translatedTitle: '학교 주변 맛있는 베트남 음식점 찾아요 🍜',
+    translatedContent:
+      '안녕하세요! 한국에 온 지 2주 되었습니다. 학교 주변에 베트남 음식점이 있나요?',
+  },
 ];
 
 export const INITIAL_COMMENTS = {
   1: [
     {
-      id: 101,
-      author: "익명 1",
-      authorId: "user_202",
-      isSelf: false,
-      time: "1시간 전",
-      content: "Hello! I am a foreign student and very interested in UI design for this contest. Can I join your team? I can speak fluent English and basic Korean!",
-      lang: "en",
-      translatedContent: "안녕하세요! 저는 외국인 학생이고 이 공모전의 UI 디자인에 매우 관심이 있습니다. 팀에 합류할 수 있을까요? 저는 유창한 영어와 기초적인 한국어를 구사할 수 있습니다!",
-      likes: 2
+      id: 101, author: '익명 1', authorId: 'user_202', isSelf: false,
+      time: '1시간 전', content: 'Hello! I am very interested in UI design for this contest. Can I join?',
+      lang: 'en', translatedContent: '안녕하세요! 이 공모전의 UI 디자인에 매우 관심이 있습니다. 합류해도 될까요?', likes: 2,
     },
     {
-      id: 102,
-      author: "익명 2",
-      authorId: "user_101",
-      isSelf: true,
-      time: "45분 전",
-      content: "와 정말요! UI 디자이너분이 꼭 필요했는데 너무 좋습니다. 영어로 소통하는 것도 전혀 문제없어요! 쪽지 보내주시면 오픈카톡 링크 보내드릴게요~",
-      lang: "ko",
-      translatedContent: "Oh really! We absolutely needed a UI designer, so this is great. Communicating in English is not a problem at all! If you send me a DM, I'll send you the Open KakaoTalk link~",
-      likes: 1
+      id: 102, author: '익명 2', authorId: 'mock_001', isSelf: true,
+      time: '45분 전', content: '와 정말요! UI 디자이너분이 꼭 필요했는데 너무 좋습니다. 쪽지 주세요~',
+      lang: 'ko', translatedContent: 'Oh really! We absolutely needed a UI designer. Send me a DM~', likes: 1,
     },
     {
-      id: 103,
-      author: "익명 3",
-      authorId: "user_303",
-      isSelf: false,
-      time: "20분 전",
-      content: "Phần mềm này có cần kinh nghiệm về Flutter không bạn?",
-      lang: "vi",
-      translatedContent: "이 소프트웨어는 Flutter 경험이 필요한가요?",
-      likes: 0
-    }
+      id: 103, author: '익명 3', authorId: 'user_303', isSelf: false,
+      time: '20분 전', content: 'Phần mềm này có cần kinh nghiệm về Flutter không bạn?',
+      lang: 'vi', translatedContent: '이 소프트웨어는 Flutter 경험이 필요한가요?', likes: 0,
+    },
   ],
   2: [
     {
-      id: 201,
-      author: "익명 1",
-      authorId: "user_101",
-      isSelf: true,
-      time: "2시간 전",
-      content: "저요! 저 영어 회화 연습하고 싶은데 같이 공부해요! 저는 한국어 표준어 가르쳐 드릴 수 있어요.",
-      lang: "ko",
-      translatedContent: "Me! I want to practice English conversation, let's study together! I can teach you standard Korean.",
-      likes: 3
+      id: 201, author: '익명 1', authorId: 'mock_001', isSelf: true,
+      time: '2시간 전', content: '저요! 영어 회화 연습하고 싶은데 같이 공부해요!',
+      lang: 'ko', translatedContent: 'Me! I want to practice English conversation!', likes: 3,
     },
     {
-      id: 202,
-      author: "Sarah Jones",
-      authorId: "user_202",
-      isSelf: false,
-      time: "1시간 전",
-      content: "That sounds awesome! I'll send you a message right away.",
-      lang: "en",
-      translatedContent: "정말 좋네요! 지금 바로 쪽지 보낼게요.",
-      likes: 1
-    }
+      id: 202, author: 'Sarah Jones', authorId: 'user_202', isSelf: false,
+      time: '1시간 전', content: "That sounds awesome! I'll send you a message right away.",
+      lang: 'en', translatedContent: '정말 좋네요! 지금 바로 쪽지 보낼게요.', likes: 1,
+    },
   ],
   3: [
     {
-      id: 301,
-      author: "익명 1",
-      authorId: "user_505",
-      isSelf: false,
-      time: "4시간 전",
-      content: "저도 TOPIK 준비 중인데 같이 공부하면 좋겠네요! 저는 몽골에서 왔습니다.",
-      lang: "ko",
-      translatedContent: "I am also preparing for TOPIK, it would be great to study together! I'm from Mongolia.",
-      likes: 2
+      id: 301, author: '익명 1', authorId: 'user_505', isSelf: false,
+      time: '4시간 전', content: '저도 TOPIK 준비 중인데 같이 공부하면 좋겠네요! 몽골에서 왔습니다.',
+      lang: 'ko', translatedContent: "I'm also preparing for TOPIK! I'm from Mongolia.", likes: 2,
     },
-    {
-      id: 302,
-      author: "익명 2",
-      authorId: "user_303",
-      isSelf: false,
-      time: "3시간 전",
-      content: "太棒了！那我们怎么联系呢？",
-      lang: "zh",
-      translatedContent: "정말 좋네요! 그럼 우리 어떻게 연락할까요?",
-      likes: 0
-    }
   ],
   4: [
     {
-      id: 401,
-      author: "익명 1",
-      authorId: "user_606",
-      isSelf: false,
-      time: "12시간 전",
-      content: "정문 건너편에 있는 '포글로벌' 진짜 현지 맛이에요! 베트남 사장님이 직접 요리하십니다. 강력 추천해요!",
-      lang: "ko",
-      translatedContent: "'Pho Global' across the main gate is real authentic local taste! The Vietnamese owner cooks it himself. Highly recommended!",
-      likes: 5
-    }
-  ]
+      id: 401, author: '익명 1', authorId: 'user_606', isSelf: false,
+      time: '12시간 전', content: "정문 건너편 '포글로벌' 진짜 현지 맛이에요! 강력 추천해요!",
+      lang: 'ko', translatedContent: "'Pho Global' across the main gate is authentic! Highly recommended!", likes: 5,
+    },
+  ],
 };
 
-// Simulated Translation, Message and Authentication API services
-export const api = {
-  // Translate post content
-  getTranslation: async (type, id, originalText) => {
-    console.log(`[API] Fetching translation for ${type} ID: ${id}`);
-    await new Promise((resolve) => setTimeout(resolve, 800));
+// Mock Events (matching /api/events schema)
+export const MOCK_EVENTS = [
+  {
+    _id: 'evt_001',
+    title: '2026 경성대학교 글로컬 문화제',
+    description: '한국 전통 문화와 세계 각국의 문화를 체험하는 연간 최대 행사입니다. 음식 부스, 공연, 전시 등 다양한 프로그램이 준비되어 있습니다.',
+    date: '2026-06-15T14:00:00Z',
+    location: '경성대학교 대운동장',
+    category: 'cultural',
+    capacity: 500,
+    applicants: 127,
+    imageUrl: null,
+    createdAt: '2026-05-01T00:00:00Z',
+  },
+  {
+    _id: 'evt_002',
+    title: '한국어-영어 언어교환 파티 🌐',
+    description: '매달 진행되는 언어교환 네트워킹 파티입니다. 한국어를 배우고 싶은 외국인과 영어를 배우고 싶은 한국 학생을 연결해 드립니다.',
+    date: '2026-05-30T18:00:00Z',
+    location: '학생회관 3층 세미나실',
+    category: 'exchange',
+    capacity: 60,
+    applicants: 45,
+    imageUrl: null,
+    createdAt: '2026-05-05T00:00:00Z',
+  },
+  {
+    _id: 'evt_003',
+    title: '글로벌 취업박람회 2026',
+    description: '국내외 글로벌 기업들이 참여하는 대규모 취업박람회입니다. 다국어 가능자 우대 채용 공고를 확인하세요!',
+    date: '2026-07-10T10:00:00Z',
+    location: '경성대학교 컨벤션홀',
+    category: 'career',
+    capacity: 300,
+    applicants: 89,
+    imageUrl: null,
+    createdAt: '2026-05-10T00:00:00Z',
+  },
+];
 
-    if (type === 'post') {
-      const post = INITIAL_POSTS.find(p => p.id === id);
-      if (post) {
+// Mock Benefits (matching /api/benefits schema)
+export const MOCK_BENEFITS = [
+  {
+    _id: 'ben_001',
+    title: '캠퍼스 주변 카페 학생 할인 20%',
+    description: '경성대학교 재학생 및 교직원 전용 혜택입니다. 학생증 제시 시 음료 전 메뉴 20% 할인을 받으실 수 있습니다.',
+    partnerName: '글로카페 (GloCafe)',
+    discount: '20%',
+    validUntil: '2026-12-31',
+    category: 'food',
+    eligibleRoles: ['student', 'staff'],
+    claimedCount: 342,
+  },
+  {
+    _id: 'ben_002',
+    title: '온라인 언어학습 플랫폼 3개월 무료',
+    description: '경성대 파트너사 제공 언어학습 앱 "LinguaKSU" 프리미엄 플랜 3개월 무료 이용권입니다.',
+    partnerName: 'LinguaKSU',
+    discount: '3개월 무료',
+    validUntil: '2026-08-31',
+    category: 'education',
+    eligibleRoles: ['student'],
+    claimedCount: 128,
+  },
+  {
+    _id: 'ben_003',
+    title: '공항버스 학생 할인권',
+    description: '부산-인천공항 노선 공항버스 왕복 30% 할인 쿠폰입니다. 외국인 유학생 귀국 시 활용 가능합니다.',
+    partnerName: '경성 공항버스',
+    discount: '30%',
+    validUntil: '2026-06-30',
+    category: 'transport',
+    eligibleRoles: ['student', 'staff'],
+    claimedCount: 67,
+  },
+];
+
+// Mock Partners (matching /api/partners schema)
+export const MOCK_PARTNERS = [
+  {
+    _id: 'par_001',
+    name: 'LinguaKSU',
+    description: '경성대 공식 언어학습 파트너 플랫폼. AI 기반 한국어 학습 서비스 제공.',
+    country: '대한민국',
+    category: 'education',
+    logoUrl: null,
+    website: 'https://linguaksu.example.com',
+  },
+  {
+    _id: 'par_002',
+    name: 'GlobalConnect Busan',
+    description: '부산 소재 글로벌 문화교류 NGO. 유학생 정착 지원 및 멘토링 프로그램 운영.',
+    country: '대한민국',
+    category: 'ngo',
+    logoUrl: null,
+    website: 'https://gcbusan.example.com',
+  },
+  {
+    _id: 'par_003',
+    name: 'Asia Pacific Exchange Network',
+    description: '아시아태평양 대학 연합 교환학생 네트워크. 30개국 150개 대학 파트너십.',
+    country: '국제',
+    category: 'education',
+    logoUrl: null,
+    website: 'https://apen.example.com',
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KSU EMAIL VALIDATION
+// 경성대학교 공식 도메인: @ks.ac.kr
+// ─────────────────────────────────────────────────────────────────────────────
+export const KSU_EMAIL_DOMAIN = '@ks.ac.kr';
+
+export const validateKsuEmail = (email) => {
+  if (!email || typeof email !== 'string') return false;
+  return email.toLowerCase().endsWith(KSU_EMAIL_DOMAIN);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOCK API HELPER
+// Wraps mock delays and responses for offline/demo use
+// ─────────────────────────────────────────────────────────────────────────────
+const mockDelay = (ms = 700) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const mockSuccess = async (data, delay = 700) => {
+  await mockDelay(delay);
+  return data;
+};
+
+const mockError = async (message, delay = 700) => {
+  await mockDelay(delay);
+  throw new Error(message);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// API SERVICE OBJECT
+// All methods first try real backend; fall back to mock if MOCK_MODE=true
+// ─────────────────────────────────────────────────────────────────────────────
+export const api = {
+
+  // ───────────────────────────────────────────────
+  // AUTH — /api/auth
+  // ───────────────────────────────────────────────
+
+  /**
+   * POST /api/auth/login
+   * Body: { email, password }
+   * Response: { token, refreshToken, user: { id, email, nickname, role } }
+   */
+  login: async (email, password) => {
+    if (MOCK_MODE) {
+      await mockDelay(800);
+      const found = REGISTERED_USERS.find(
+        (u) => (u.email.toLowerCase() === email.toLowerCase() || u.username.toLowerCase() === email.toLowerCase())
+               && u.password === password
+      );
+      if (found) {
+        const token = `mock_jwt_${found.id}_${Date.now()}`;
+        tokenManager.setTokens(token, `mock_refresh_${found.id}`);
         return {
-          translatedTitle: post.translatedTitle,
-          translatedContent: post.translatedContent
+          success: true,
+          token,
+          user: {
+            id: found.id,
+            username: found.username,
+            nickname: found.nickname,
+            email: found.email,
+            role: found.role,
+            preferredLanguage: found.preferredLanguage || 'ko',
+          },
+          message: `${found.nickname} 님, 환영합니다!`,
         };
       }
-    } else if (type === 'comment') {
-      for (const postId in INITIAL_COMMENTS) {
-        const comment = INITIAL_COMMENTS[postId].find(c => c.id === id);
-        if (comment) {
-          return {
-            translatedContent: comment.translatedContent
-          };
+      throw new Error('아이디/이메일 또는 비밀번호가 올바르지 않습니다.');
+    }
+    const { data } = await axiosInstance.post('/auth/login', { email, password });
+    tokenManager.setTokens(data.token, data.refreshToken);
+    return { success: true, ...data };
+  },
+
+  /**
+   * POST /api/auth/register
+   * Body: { email, password, nickname, role, preferredLanguage }
+   * 학교 이메일 도메인 @ks.ac.kr 검증 필수
+   */
+  register: async (userData) => {
+    if (MOCK_MODE) {
+      await mockDelay(800);
+      if (!validateKsuEmail(userData.email)) {
+        throw new Error(`경성대학교 이메일(@ks.ac.kr)만 가입 가능합니다.`);
+      }
+      const exists = REGISTERED_USERS.some(
+        (u) => u.email.toLowerCase() === userData.email.toLowerCase()
+             || (userData.username && u.username?.toLowerCase() === userData.username.toLowerCase())
+      );
+      if (exists) throw new Error('이미 가입된 이메일 또는 아이디입니다.');
+
+      const newUser = {
+        id: `mock_${Date.now()}`,
+        username: userData.username || userData.email.split('@')[0],
+        password: userData.password,
+        nickname: userData.nickname || `익명_${Math.floor(Math.random() * 9000) + 1000}`,
+        email: userData.email,
+        role: userData.role || 'student',
+        preferredLanguage: userData.preferredLanguage || 'ko',
+      };
+      REGISTERED_USERS.push(newUser);
+      return { success: true, message: '회원가입이 완료되었습니다! 로그인해 주세요.' };
+    }
+    const { data } = await axiosInstance.post('/auth/register', userData);
+    return { success: true, ...data };
+  },
+
+  /**
+   * POST /api/auth/logout
+   * Clears local tokens
+   */
+  logout: async () => {
+    tokenManager.clearTokens();
+    if (MOCK_MODE) return mockSuccess({ success: true, message: '로그아웃 되었습니다.' }, 200);
+    try { await axiosInstance.post('/auth/logout'); } catch {}
+    return { success: true };
+  },
+
+  /**
+   * POST /api/auth/refresh
+   * Handled automatically by axios interceptor
+   */
+  refreshToken: async () => {
+    const refresh = tokenManager.getRefreshToken();
+    if (!refresh) throw new Error('리프레시 토큰이 없습니다.');
+    const { data } = await axiosInstance.post('/auth/refresh', { token: refresh });
+    tokenManager.setTokens(data.accessToken, data.refreshToken);
+    return data;
+  },
+
+  // ───────────────────────────────────────────────
+  // USERS — /api/users
+  // ───────────────────────────────────────────────
+
+  /**
+   * GET /api/users/me
+   */
+  getMe: async () => {
+    if (MOCK_MODE) {
+      const token = tokenManager.getAccessToken();
+      if (!token) throw new Error('인증이 필요합니다.');
+      const idMatch = token.match(/mock_jwt_(.+?)_/);
+      if (idMatch) {
+        const user = REGISTERED_USERS.find((u) => u.id === idMatch[1]);
+        if (user) return mockSuccess({ success: true, user });
+      }
+      throw new Error('사용자 정보를 찾을 수 없습니다.');
+    }
+    const { data } = await axiosInstance.get('/users/me');
+    return { success: true, user: data };
+  },
+
+  /**
+   * PUT /api/users/me
+   * Body: { nickname, preferredLanguage }
+   */
+  updateMe: async (updateData) => {
+    if (MOCK_MODE) {
+      await mockDelay(600);
+      const token = tokenManager.getAccessToken();
+      const idMatch = token?.match(/mock_jwt_(.+?)_/);
+      if (idMatch) {
+        const idx = REGISTERED_USERS.findIndex((u) => u.id === idMatch[1]);
+        if (idx !== -1) {
+          REGISTERED_USERS[idx] = { ...REGISTERED_USERS[idx], ...updateData };
+          return { success: true, user: REGISTERED_USERS[idx], message: '프로필이 수정되었습니다.' };
         }
       }
+      throw new Error('사용자를 찾을 수 없습니다.');
     }
-
-    return {
-      translatedTitle: "[Translated] " + (originalText.slice(0, 10) + "..."),
-      translatedContent: `[Translation Result] This is a mock translation for "${originalText.slice(0, 30)}..." which is requested in real-time.`
-    };
+    const { data } = await axiosInstance.put('/users/me', updateData);
+    return { success: true, ...data };
   },
 
-  // Delete post simulation
+  /**
+   * GET /api/users — Admin only
+   */
+  getUsers: async () => {
+    if (MOCK_MODE) return mockSuccess({ success: true, users: REGISTERED_USERS });
+    const { data } = await axiosInstance.get('/users');
+    return { success: true, users: data };
+  },
+
+  // ───────────────────────────────────────────────
+  // EVENTS — /api/events
+  // ───────────────────────────────────────────────
+
+  /** GET /api/events */
+  getEvents: async () => {
+    if (MOCK_MODE) return mockSuccess({ success: true, events: MOCK_EVENTS }, 500);
+    const { data } = await axiosInstance.get('/events');
+    return { success: true, events: data };
+  },
+
+  /** GET /api/events/:id */
+  getEvent: async (id) => {
+    if (MOCK_MODE) {
+      const event = MOCK_EVENTS.find((e) => e._id === id);
+      if (!event) return mockError('이벤트를 찾을 수 없습니다.');
+      return mockSuccess({ success: true, event });
+    }
+    const { data } = await axiosInstance.get(`/events/${id}`);
+    return { success: true, event: data };
+  },
+
+  /** POST /api/events — Admin */
+  createEvent: async (eventData) => {
+    if (MOCK_MODE) {
+      const newEvent = { _id: `evt_${Date.now()}`, ...eventData, applicants: 0, createdAt: new Date().toISOString() };
+      MOCK_EVENTS.unshift(newEvent);
+      return mockSuccess({ success: true, event: newEvent, message: '이벤트가 등록되었습니다.' });
+    }
+    const { data } = await axiosInstance.post('/events', eventData);
+    return { success: true, ...data };
+  },
+
+  /** PUT /api/events/:id — Admin */
+  updateEvent: async (id, eventData) => {
+    if (MOCK_MODE) {
+      const idx = MOCK_EVENTS.findIndex((e) => e._id === id);
+      if (idx === -1) return mockError('이벤트를 찾을 수 없습니다.');
+      MOCK_EVENTS[idx] = { ...MOCK_EVENTS[idx], ...eventData };
+      return mockSuccess({ success: true, event: MOCK_EVENTS[idx], message: '이벤트가 수정되었습니다.' });
+    }
+    const { data } = await axiosInstance.put(`/events/${id}`, eventData);
+    return { success: true, ...data };
+  },
+
+  /** DELETE /api/events/:id — Admin */
+  deleteEvent: async (id) => {
+    if (MOCK_MODE) {
+      const idx = MOCK_EVENTS.findIndex((e) => e._id === id);
+      if (idx !== -1) MOCK_EVENTS.splice(idx, 1);
+      return mockSuccess({ success: true, message: '이벤트가 삭제되었습니다.' }, 400);
+    }
+    const { data } = await axiosInstance.delete(`/events/${id}`);
+    return { success: true, ...data };
+  },
+
+  /** POST /api/events/:id/apply */
+  applyEvent: async (id) => {
+    if (MOCK_MODE) {
+      const event = MOCK_EVENTS.find((e) => e._id === id);
+      if (event) event.applicants = (event.applicants || 0) + 1;
+      return mockSuccess({ success: true, message: '이벤트 신청이 완료되었습니다!' });
+    }
+    const { data } = await axiosInstance.post(`/events/${id}/apply`);
+    return { success: true, ...data };
+  },
+
+  // ───────────────────────────────────────────────
+  // BENEFITS — /api/benefits
+  // ───────────────────────────────────────────────
+
+  /** GET /api/benefits */
+  getBenefits: async () => {
+    if (MOCK_MODE) return mockSuccess({ success: true, benefits: MOCK_BENEFITS }, 500);
+    const { data } = await axiosInstance.get('/benefits');
+    return { success: true, benefits: data };
+  },
+
+  /** GET /api/benefits/:id */
+  getBenefit: async (id) => {
+    if (MOCK_MODE) {
+      const benefit = MOCK_BENEFITS.find((b) => b._id === id);
+      if (!benefit) return mockError('혜택을 찾을 수 없습니다.');
+      return mockSuccess({ success: true, benefit });
+    }
+    const { data } = await axiosInstance.get(`/benefits/${id}`);
+    return { success: true, benefit: data };
+  },
+
+  /** POST /api/benefits/:id/claim */
+  claimBenefit: async (id) => {
+    if (MOCK_MODE) {
+      const benefit = MOCK_BENEFITS.find((b) => b._id === id);
+      if (benefit) benefit.claimedCount = (benefit.claimedCount || 0) + 1;
+      return mockSuccess({
+        success: true,
+        couponCode: `KSU-${id.toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+        message: '혜택 쿠폰이 발급되었습니다!',
+      });
+    }
+    const { data } = await axiosInstance.post(`/benefits/${id}/claim`);
+    return { success: true, ...data };
+  },
+
+  // ───────────────────────────────────────────────
+  // POSTS — /api/posts
+  // ───────────────────────────────────────────────
+
+  /** GET /api/posts */
+  getPosts: async (params = {}) => {
+    if (MOCK_MODE) return mockSuccess({ success: true, posts: INITIAL_POSTS }, 400);
+    const { data } = await axiosInstance.get('/posts', { params });
+    return { success: true, posts: data };
+  },
+
+  /** POST /api/posts */
+  createPost: async (postData) => {
+    if (MOCK_MODE) {
+      const newPost = {
+        id: Date.now(),
+        ...postData,
+        likes: 0, commentsCount: 0, liked: false,
+        time: '방금 전',
+        createdAt: new Date().toISOString(),
+      };
+      INITIAL_POSTS.unshift(newPost);
+      return mockSuccess({ success: true, post: newPost, message: '게시글이 등록되었습니다.' });
+    }
+    const { data } = await axiosInstance.post('/posts', postData);
+    return { success: true, ...data };
+  },
+
+  /** PUT /api/posts/:id */
+  updatePost: async (id, postData) => {
+    if (MOCK_MODE) {
+      const idx = INITIAL_POSTS.findIndex((p) => p.id === id);
+      if (idx !== -1) INITIAL_POSTS[idx] = { ...INITIAL_POSTS[idx], ...postData };
+      return mockSuccess({ success: true, message: '게시글이 수정되었습니다.' });
+    }
+    const { data } = await axiosInstance.put(`/posts/${id}`, postData);
+    return { success: true, ...data };
+  },
+
+  /** DELETE /api/posts/:id */
   deletePost: async (id) => {
-    console.log(`[API] Deleting post ID: ${id}`);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return { success: true, message: "게시글이 성공적으로 삭제되었습니다." };
+    if (MOCK_MODE) return mockSuccess({ success: true, message: '게시글이 삭제되었습니다.' }, 500);
+    const { data } = await axiosInstance.delete(`/posts/${id}`);
+    return { success: true, ...data };
   },
 
-  // Delete comment simulation
+  /** DELETE comment (local-only — backend uses posts comments sub-route) */
   deleteComment: async (id) => {
-    console.log(`[API] Deleting comment ID: ${id}`);
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    return { success: true, message: "댓글이 성공적으로 삭제되었습니다." };
+    return mockSuccess({ success: true, message: '댓글이 삭제되었습니다.' }, 400);
   },
 
-  // Send message simulation
+  // ───────────────────────────────────────────────
+  // PARTNERS — /api/partners
+  // ───────────────────────────────────────────────
+
+  /** GET /api/partners */
+  getPartners: async () => {
+    if (MOCK_MODE) return mockSuccess({ success: true, partners: MOCK_PARTNERS }, 500);
+    const { data } = await axiosInstance.get('/partners');
+    return { success: true, partners: data };
+  },
+
+  /** POST /api/partners — Admin */
+  createPartner: async (partnerData) => {
+    if (MOCK_MODE) {
+      const newPartner = { _id: `par_${Date.now()}`, ...partnerData };
+      MOCK_PARTNERS.push(newPartner);
+      return mockSuccess({ success: true, partner: newPartner, message: '파트너사가 등록되었습니다.' });
+    }
+    const { data } = await axiosInstance.post('/partners', partnerData);
+    return { success: true, ...data };
+  },
+
+  // ───────────────────────────────────────────────
+  // HEALTH CHECK — /api/health
+  // ───────────────────────────────────────────────
+  healthCheck: async () => {
+    if (MOCK_MODE) return mockSuccess({ status: 'ok', mode: 'mock', timestamp: new Date().toISOString() }, 200);
+    const { data } = await axiosInstance.get('/health');
+    return data;
+  },
+
+  // ───────────────────────────────────────────────
+  // LEGACY / UTILITY (kept for backward compatibility)
+  // ───────────────────────────────────────────────
+
+  /** Translation (simulated — replace with real translation API) */
+  getTranslation: async (type, id, originalText) => {
+    await mockDelay(800);
+    if (type === 'post') {
+      const post = INITIAL_POSTS.find((p) => p.id === id);
+      if (post) return { translatedTitle: post.translatedTitle, translatedContent: post.translatedContent };
+    }
+    return {
+      translatedTitle: `[Translated] ${originalText?.slice(0, 20)}...`,
+      translatedContent: `[Translation] ${originalText}`,
+    };
+  },
+
+  /** Send message (DM) — simulated */
   sendMessage: async (receiverName, messageText) => {
-    console.log(`[API] Sending message to ${receiverName}: ${messageText}`);
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    return { success: true, message: `[${receiverName}] 님에게 쪽지가 정상적으로 전송되었습니다.` };
+    return mockSuccess({
+      success: true,
+      message: `[${receiverName}] 님에게 쪽지가 전송되었습니다.`,
+    }, 600);
   },
 
-  // ----------------------------------------------------
-  // AUTHENTICATION SIMULATIONS (NEW IN 2ND SCOPE)
-  // ----------------------------------------------------
-
-  // 1. User Login
-  login: async (username, password) => {
-    console.log(`[API] Attempting login for username: ${username}`);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    const user = REGISTERED_USERS.find(
-      (u) => u.username.toLowerCase() === username.toLowerCase() && u.password === password
-    );
-
-    if (user) {
-      return {
-        success: true,
-        user: {
-          username: user.username,
-          nickname: user.nickname,
-          email: user.email,
-          preferredLanguage: user.preferredLanguage || 'ko'
-        },
-        message: `${user.nickname} 님, 환영합니다!`
-      };
-    } else {
-      throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
-    }
-  },
-
-  // 2. Send Verification Email Code
+  /** Email verification (for signup) */
   sendVerificationEmail: async (email) => {
-    console.log(`[API] Sending school email verification code to: ${email}`);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    // Simple validation (must look like email)
-    if (!email.includes('@') || email.length < 5) {
-      throw new Error("올바른 이메일 주소를 입력해주세요.");
-    }
-
+    await mockDelay(800);
+    if (!email.includes('@') || email.length < 5) throw new Error('올바른 이메일 주소를 입력해주세요.');
+    if (!validateKsuEmail(email)) throw new Error(`경성대학교 이메일(${KSU_EMAIL_DOMAIN})만 가입 가능합니다.`);
     return {
       success: true,
-      code: "1234", // Predefined mock code
-      message: `[인증 코드: 1234]가 ${email} 메일로 발송되었습니다. 3분 이내에 입력해주세요!`
+      code: '1234',
+      message: `[인증 코드: 1234]가 ${email}로 발송되었습니다. 3분 이내에 입력해주세요!`,
     };
   },
 
-  // 3. Verify Code
+  /** Verify email code */
   verifyEmailCode: async (email, code) => {
-    console.log(`[API] Verifying code ${code} for email: ${email}`);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    if (code === "1234") {
-      return {
-        success: true,
-        message: "학교 메일 인증이 성공적으로 완료되었습니다!"
-      };
-    } else {
-      throw new Error("인증 번호가 일치하지 않습니다. 다시 입력해주세요.");
-    }
+    await mockDelay(500);
+    if (code === '1234') return { success: true, message: '학교 메일 인증이 완료되었습니다!' };
+    throw new Error('인증 번호가 일치하지 않습니다. 다시 입력해주세요.');
   },
 
-  // 4. Register / Sign Up
-  signup: async (userData) => {
-    console.log(`[API] Attempting registration for user:`, userData);
-    await new Promise((resolve) => setTimeout(resolve, 800));
+  /** Signup (legacy alias → register) */
+  signup: async (userData) => api.register(userData),
 
-    // Check if user already exists
-    const userExists = REGISTERED_USERS.some(
-      (u) => u.username.toLowerCase() === userData.username.toLowerCase()
-    );
-
-    if (userExists) {
-      throw new Error("이미 사용 중인 아이디입니다.");
-    }
-
-    // Append to in-memory list
-    const newUser = {
-      username: userData.username,
-      password: userData.password,
-      nickname: userData.nickname || `익명_${Math.floor(Math.random() * 9000) + 1000}`,
-      email: userData.email,
-      preferredLanguage: userData.preferredLanguage || 'ko'
-    };
-    
-    REGISTERED_USERS.push(newUser);
-
-    return {
-      success: true,
-      message: "회원가입이 완료되었습니다! 로그인 해보세요."
-    };
-  },
-
-  // 5. Find ID by School Email
+  /** Find ID by email */
   findId: async (email) => {
-    console.log(`[API] Finding ID linked to email: ${email}`);
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
+    await mockDelay(600);
     const user = REGISTERED_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase());
-
-    if (user) {
-      return {
-        success: true,
-        username: user.username,
-        message: `가입된 아이디는 [ ${user.username} ] 입니다.`
-      };
-    } else {
-      throw new Error("등록되지 않은 학교 이메일 주소입니다.");
-    }
+    if (user) return { success: true, username: user.username, message: `가입된 아이디: [ ${user.username} ]` };
+    throw new Error('등록되지 않은 이메일 주소입니다.');
   },
 
-  // 6. Find & Reset Password (Simulated)
-  findPassword: async (username, email) => {
-    console.log(`[API] Recovering PW for ID: ${username}, email: ${email}`);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
+  /** Reset password */
+  resetPassword: async (username, email) => {
+    await mockDelay(800);
     const user = REGISTERED_USERS.find(
       (u) => u.username.toLowerCase() === username.toLowerCase() && u.email.toLowerCase() === email.toLowerCase()
     );
+    if (user) return { success: true, message: `${email}로 비밀번호 재설정 링크를 발송했습니다!` };
+    throw new Error('일치하는 회원 정보가 없습니다.');
+  },
 
-    if (user) {
-      return {
-        success: true,
-        message: `[인증 통과] ${email} 메일로 임시 비밀번호 재설정 링크를 발송해 드렸습니다!`
-      };
-    } else {
-      throw new Error("일치하는 회원 정보가 존재하지 않습니다.");
-    }
-  }
+  /** Legacy: findPassword alias */
+  findPassword: async (username, email) => api.resetPassword(username, email),
 };
+
+export default api;
