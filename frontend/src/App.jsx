@@ -681,12 +681,12 @@ export default function App() {
             </div>
             <div className="space-y-1.5">
               {[
-                { method: 'POST', path: '/api/auth/login',    status: 'active' },
-                { method: 'GET',  path: '/api/users/me',      status: 'active' },
-                { method: 'GET',  path: '/api/events',        status: 'active' },
-                { method: 'GET',  path: '/api/benefits',      status: 'active' },
-                { method: 'GET',  path: '/api/posts',         status: 'active' },
-                { method: 'GET',  path: '/api/partners',      status: 'active' },
+                { method: 'POST', path: '/api/auth/login',    status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                { method: 'GET',  path: '/api/users/me',      status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                { method: 'GET',  path: '/api/events',        status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                { method: 'GET',  path: '/api/benefits',      status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                { method: 'GET',  path: '/api/posts',         status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                { method: 'GET',  path: '/api/partners',      status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
                 { method: 'GET',  path: '/api/health',        status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
               ].map(({ method, path, status }) => (
                 <div key={path} className="flex items-center justify-between">

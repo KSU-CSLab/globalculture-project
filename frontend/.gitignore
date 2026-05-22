@@ -25,3 +25,4 @@ dist-ssr
 
 # Temporary clone folder
 .temp_git_clone
+.vercel
