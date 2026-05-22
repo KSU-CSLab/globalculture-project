@@ -62,7 +62,7 @@ axiosInstance.interceptors.response.use(
 // MOCK DATA (fallback when backend is not running)
 // Used for demo/development mode when backend is unavailable
 // ─────────────────────────────────────────────────────────────────────────────
-const MOCK_MODE = true; // Set to false when backend is running
+let MOCK_MODE = true; // Dynamically toggled based on health check
 
 export const REGISTERED_USERS = [
   {
@@ -687,9 +687,15 @@ export const api = {
   // HEALTH CHECK — /api/health
   // ───────────────────────────────────────────────
   healthCheck: async () => {
-    if (MOCK_MODE) return mockSuccess({ status: 'ok', mode: 'mock', timestamp: new Date().toISOString() }, 200);
-    const { data } = await axiosInstance.get('/health');
-    return data;
+    try {
+      // Always test real backend health
+      const { data } = await axiosInstance.get('/health');
+      MOCK_MODE = false;
+      return data;
+    } catch (err) {
+      MOCK_MODE = true;
+      throw err;
+    }
   },
 
   // ───────────────────────────────────────────────
