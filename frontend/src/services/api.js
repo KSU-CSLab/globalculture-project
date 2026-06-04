@@ -393,7 +393,23 @@ export const api = {
       throw new Error('아이디/이메일 또는 비밀번호가 올바르지 않습니다.');
     }
     const { data } = await axiosInstance.post('/auth/login', { email, password });
-    tokenManager.setTokens(data.token, data.refreshToken);
+    const backendData = data.data; // { user, accessToken, refreshToken }
+    if (backendData && backendData.accessToken) {
+      tokenManager.setTokens(backendData.accessToken, backendData.refreshToken);
+      const mappedUser = {
+        id: backendData.user._id,
+        username: backendData.user.email.split('@')[0],
+        nickname: backendData.user.name,
+        email: backendData.user.email,
+        role: backendData.user.role,
+        preferredLanguage: backendData.user.nationality?.toLowerCase() || 'ko',
+      };
+      return {
+        success: true,
+        user: mappedUser,
+        message: data.message || '로그인 성공',
+      };
+    }
     return { success: true, ...data };
   },
 
@@ -426,7 +442,31 @@ export const api = {
       REGISTERED_USERS.push(newUser);
       return { success: true, message: '회원가입이 완료되었습니다! 로그인해 주세요.' };
     }
-    const { data } = await axiosInstance.post('/auth/register', userData);
+    const payload = {
+      name: userData.nickname || userData.email.split('@')[0],
+      email: userData.email,
+      password: userData.password,
+      role: userData.role || 'student',
+      nationality: userData.preferredLanguage?.toUpperCase() || 'KR',
+    };
+    const { data } = await axiosInstance.post('/auth/register', payload);
+    const backendData = data.data; // { user, accessToken, refreshToken }
+    if (backendData && backendData.accessToken) {
+      tokenManager.setTokens(backendData.accessToken, backendData.refreshToken);
+      const mappedUser = {
+        id: backendData.user._id,
+        username: backendData.user.email.split('@')[0],
+        nickname: backendData.user.name,
+        email: backendData.user.email,
+        role: backendData.user.role,
+        preferredLanguage: backendData.user.nationality?.toLowerCase() || 'ko',
+      };
+      return {
+        success: true,
+        user: mappedUser,
+        message: data.message || '회원가입이 완료되었습니다.',
+      };
+    }
     return { success: true, ...data };
   },
 
@@ -472,6 +512,18 @@ export const api = {
       throw new Error('사용자 정보를 찾을 수 없습니다.');
     }
     const { data } = await axiosInstance.get('/users/me');
+    const backendUser = data.data;
+    if (backendUser) {
+      const mappedUser = {
+        id: backendUser._id,
+        username: backendUser.email.split('@')[0],
+        nickname: backendUser.name,
+        email: backendUser.email,
+        role: backendUser.role,
+        preferredLanguage: backendUser.nationality?.toLowerCase() || 'ko',
+      };
+      return { success: true, user: mappedUser };
+    }
     return { success: true, user: data };
   },
 
@@ -493,7 +545,28 @@ export const api = {
       }
       throw new Error('사용자를 찾을 수 없습니다.');
     }
-    const { data } = await axiosInstance.put('/users/me', updateData);
+    const payload = {
+      name: updateData.nickname,
+      nationality: updateData.preferredLanguage?.toUpperCase(),
+      department: updateData.department,
+      bio: updateData.bio,
+      studentId: updateData.studentId,
+    };
+    Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+
+    const { data } = await axiosInstance.put('/users/me', payload);
+    const backendUser = data.data;
+    if (backendUser) {
+      const mappedUser = {
+        id: backendUser._id,
+        username: backendUser.email.split('@')[0],
+        nickname: backendUser.name,
+        email: backendUser.email,
+        role: backendUser.role,
+        preferredLanguage: backendUser.nationality?.toLowerCase() || 'ko',
+      };
+      return { success: true, user: mappedUser, message: data.message || '프로필이 수정되었습니다.' };
+    }
     return { success: true, ...data };
   },
 

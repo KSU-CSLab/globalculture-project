@@ -9,11 +9,12 @@ import EventsSection from './components/EventsSection';
 import BenefitsSection from './components/BenefitsSection';
 import PartnersSection from './components/PartnersSection';
 import { LoginView, SignUpView, ForgotAccountView } from './components/AuthComponents';
+import AppDownloadModal from './components/AppDownloadModal';
 import { api, INITIAL_POSTS, INITIAL_COMMENTS } from './services/api';
 import {
   PlusCircle, Globe, Flame, Sparkles, Send,
   CheckCircle2, Sun, Moon, Calendar, Gift, Handshake, Users,
-  Activity, Wifi, WifiOff,
+  Activity, Wifi, WifiOff, Smartphone,
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -25,6 +26,9 @@ export default function App() {
   // ── Auth ──────────────────────────────────────────────────────────────────
   const [user, setUser]         = useState(null);
   const [authView, setAuthView] = useState('login'); // 'login' | 'signup' | 'forgot'
+  const [isAppDownloadOpen, setIsAppDownloadOpen] = useState(false);
+
+  console.log('App render. isAppDownloadOpen state:', isAppDownloadOpen);
 
   // ── Active section (nav) ──────────────────────────────────────────────────
   const [activeSection, setActiveSection] = useState('community');
@@ -59,8 +63,13 @@ export default function App() {
 
   // ── Theme ─────────────────────────────────────────────────────────────────
   const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    try {
+      const saved = localStorage.getItem('theme');
+      return saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    } catch (e) {
+      console.error('Failed to get theme from localStorage:', e);
+      return false;
+    }
   });
 
   // ── Toast ─────────────────────────────────────────────────────────────────
@@ -90,6 +99,29 @@ export default function App() {
       .then((data) => setBackendOnline(data?.status === 'ok' || true))
       .catch(() => setBackendOnline(false));
   }, []);
+
+  // Auto open download modal on first visit for non-logged-in users
+  useEffect(() => {
+    if (!user) {
+      try {
+        const hideToday = localStorage.getItem('ksu_hide_app_download_today');
+        const todayStr = new Date().toDateString();
+        if (hideToday !== todayStr) {
+          const timer = setTimeout(() => {
+            setIsAppDownloadOpen(true);
+          }, 1200);
+          return () => clearTimeout(timer);
+        }
+      } catch (e) {
+        console.error('Failed to access localStorage:', e);
+        // Fallback: auto-open anyway
+        const timer = setTimeout(() => {
+          setIsAppDownloadOpen(true);
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user]);
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -343,6 +375,34 @@ export default function App() {
                 </div>
               ))}
             </div>
+
+            {/* Hybrid App QR Code & Download Section */}
+            <div className="bg-white/85 dark:bg-slate-900/70 backdrop-blur-md rounded-2xl p-4 border border-brand-gold/30 dark:border-brand-gold/25 shadow-premium flex items-center space-x-4">
+              <div className="bg-white p-2 rounded-xl border border-slate-200 dark:border-slate-800 flex-shrink-0 flex items-center justify-center">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&color=0f172a&data=${encodeURIComponent(import.meta.env.VITE_APK_URL || `${window.location.origin}/ksu-culture-hub.apk`)}`}
+                  alt="APK QR Code"
+                  className="w-16 h-16 select-none"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="inline-block bg-brand-gold text-slate-900 text-[8px] font-black px-1.5 py-0.5 rounded-full mb-1">Android APK</span>
+                <h4 className="text-xs font-black text-slate-850 dark:text-white truncate">하이브리드 앱 출시!</h4>
+                <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 leading-tight">
+                  QR을 스캔하여 모바일 앱을 직접 설치하세요.
+                </p>
+                <div className="flex items-center space-x-2.5 mt-2">
+                  <a
+                    href="/ksu-culture-hub.apk"
+                    download="ksu-culture-hub.apk"
+                    className="text-[10px] font-black text-brand-gold-dark dark:text-brand-gold hover:underline flex items-center"
+                  >
+                    APK 직접 다운로드 →
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="text-[11px] text-slate-400 dark:text-slate-500 font-bold">
@@ -374,6 +434,15 @@ export default function App() {
               {authView === 'forgot' && <ForgotAccountView onNavigateToLogin={() => setAuthView('login')} showToast={showToast} />}
             </div>
           </div>
+
+          {/* Quick APK Download Badge */}
+          <button
+            onClick={() => setIsAppDownloadOpen(true)}
+            className="mt-6 flex items-center space-x-2 rounded-full px-4.5 py-2 border bg-white dark:bg-slate-900 border-slate-200/60 dark:border-slate-800 text-slate-600 dark:text-slate-350 text-[10px] font-black shadow-md hover:border-brand-gold hover:text-brand-gold-dark dark:hover:text-brand-gold active:scale-95 transition-all select-none"
+          >
+            <Smartphone size={13} className="text-brand-gold-dark dark:text-brand-gold animate-bounce" />
+            <span>📱 모바일 하이브리드 앱(APK) 다운로드</span>
+          </button>
         </div>
       </div>
     );
@@ -507,6 +576,15 @@ export default function App() {
                 </div>
               </div>
             )}
+
+            {/* App Download Link */}
+            <button
+              onClick={() => setIsAppDownloadOpen(true)}
+              className="w-full flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-br from-amber-500/10 to-brand-gold/10 hover:from-amber-500/20 hover:to-brand-gold/20 dark:from-slate-950 dark:to-slate-950/80 border border-brand-gold/25 py-2.5 text-xs font-black text-slate-800 dark:text-brand-gold transition-colors"
+            >
+              <Smartphone size={13} className="text-brand-gold-dark dark:text-brand-gold flex-shrink-0 animate-bounce" />
+              <span>모바일 앱 설치 (APK)</span>
+            </button>
 
             {/* Logout */}
             <button
@@ -789,6 +867,13 @@ export default function App() {
         onPostClick={handlePostClickFocus}
         onWithdrawal={handleWithdrawal}
         showToast={showToast}
+      />
+
+      {/* App Download Modal */}
+      <AppDownloadModal
+        isOpen={isAppDownloadOpen}
+        onClose={() => setIsAppDownloadOpen(false)}
+        apkUrl={import.meta.env.VITE_APK_URL || `${window.location.origin}/ksu-culture-hub.apk`}
       />
 
       {/* Mobile Bottom Nav */}
