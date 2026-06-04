@@ -577,16 +577,14 @@ export default function App() {
               </div>
             )}
 
-            {/* App Download Link (Admin Only) */}
-            {user?.role === 'admin' && (
-              <button
-                onClick={() => setIsAppDownloadOpen(true)}
-                className="w-full flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-br from-amber-500/10 to-brand-gold/10 hover:from-amber-500/20 hover:to-brand-gold/20 dark:from-slate-950 dark:to-slate-950/80 border border-brand-gold/25 py-2.5 text-xs font-black text-slate-800 dark:text-brand-gold transition-colors"
-              >
-                <Smartphone size={13} className="text-brand-gold-dark dark:text-brand-gold flex-shrink-0 animate-bounce" />
-                <span>모바일 앱 설치 (APK)</span>
-              </button>
-            )}
+            {/* App Download Link */}
+            <button
+              onClick={() => setIsAppDownloadOpen(true)}
+              className="w-full flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-br from-amber-500/10 to-brand-gold/10 hover:from-amber-500/20 hover:to-brand-gold/20 dark:from-slate-950 dark:to-slate-950/80 border border-brand-gold/25 py-2.5 text-xs font-black text-slate-800 dark:text-brand-gold transition-colors"
+            >
+              <Smartphone size={13} className="text-brand-gold-dark dark:text-brand-gold flex-shrink-0 animate-bounce" />
+              <span>모바일 앱 설치 (APK)</span>
+            </button>
 
             {/* Logout */}
             <button
@@ -753,42 +751,44 @@ export default function App() {
         {/* ── RIGHT SIDEBAR (Desktop) ── */}
         <aside className="hidden lg:block lg:col-span-3 space-y-4">
 
-          {/* API Status Widget */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-800/80 shadow-premium transition-colors duration-300">
-            <div className="flex items-center space-x-2 mb-3">
-              <Activity size={13} className="text-brand-gold-dark dark:text-brand-gold" />
-              <h4 className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">백엔드 API 상태</h4>
-            </div>
-            <div className="space-y-1.5">
-              {[
-                { method: 'POST', path: '/api/auth/login',    status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
-                { method: 'GET',  path: '/api/users/me',      status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
-                { method: 'GET',  path: '/api/events',        status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
-                { method: 'GET',  path: '/api/benefits',      status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
-                { method: 'GET',  path: '/api/posts',         status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
-                { method: 'GET',  path: '/api/partners',      status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
-                { method: 'GET',  path: '/api/health',        status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
-              ].map(({ method, path, status }) => (
-                <div key={path} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1.5">
-                    <span className={`text-[8px] font-extrabold px-1 py-0.5 rounded ${
-                      method === 'GET'    ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400' :
-                      method === 'POST'   ? 'bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400'  :
-                      method === 'PUT'    ? 'bg-orange-100 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400' :
-                                            'bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400'
-                    }`}>{method}</span>
-                    <span className="text-[9px] font-mono font-bold text-slate-500 dark:text-slate-400">{path}</span>
+          {/* API Status Widget (Admin Only) */}
+          {user?.role === 'admin' && (
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-800/80 shadow-premium transition-colors duration-300">
+              <div className="flex items-center space-x-2 mb-3">
+                <Activity size={13} className="text-brand-gold-dark dark:text-brand-gold" />
+                <h4 className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">백엔드 API 상태</h4>
+              </div>
+              <div className="space-y-1.5">
+                {[
+                  { method: 'POST', path: '/api/auth/login',    status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                  { method: 'GET',  path: '/api/users/me',      status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                  { method: 'GET',  path: '/api/events',        status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                  { method: 'GET',  path: '/api/benefits',      status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                  { method: 'GET',  path: '/api/posts',         status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                  { method: 'GET',  path: '/api/partners',      status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                  { method: 'GET',  path: '/api/health',        status: backendOnline === true ? 'live' : backendOnline === false ? 'offline' : 'unknown' },
+                ].map(({ method, path, status }) => (
+                  <div key={path} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1.5">
+                      <span className={`text-[8px] font-extrabold px-1 py-0.5 rounded ${
+                        method === 'GET'    ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400' :
+                        method === 'POST'   ? 'bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400'  :
+                        method === 'PUT'    ? 'bg-orange-100 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400' :
+                                              'bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400'
+                      }`}>{method}</span>
+                      <span className="text-[9px] font-mono font-bold text-slate-500 dark:text-slate-400">{path}</span>
+                    </div>
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                      status === 'live'    ? 'bg-green-500 animate-pulse' :
+                      status === 'offline' ? 'bg-red-500' :
+                      status === 'active'  ? 'bg-brand-gold' :
+                                            'bg-slate-400'
+                    }`} />
                   </div>
-                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                    status === 'live'    ? 'bg-green-500 animate-pulse' :
-                    status === 'offline' ? 'bg-red-500' :
-                    status === 'active'  ? 'bg-brand-gold' :
-                                          'bg-slate-400'
-                  }`} />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* HOT Posts Widget (community only) */}
           {activeSection === 'community' && (
