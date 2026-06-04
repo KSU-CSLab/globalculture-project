@@ -34,11 +34,9 @@ export default function Header({
         {/* Brand + Nav */}
         <div className="flex items-center space-x-6 select-none">
           {/* Logo */}
-          <div className="flex items-center space-x-2 flex-shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-gold text-slate-900 shadow-md shadow-brand-gold/20">
-              <span className="font-extrabold text-base">K</span>
-            </div>
-            <h1 className="font-sans text-base font-extrabold tracking-tight text-slate-800 dark:text-white leading-none">
+          <div className="flex items-center space-x-2.5 flex-shrink-0">
+            <img src="/logo.png" alt="Kyungsung University Logo" className="h-8 w-8 object-contain" />
+            <h1 className="font-sans text-sm font-extrabold tracking-tight text-slate-800 dark:text-white leading-none">
               KSU <span className="text-brand-gold-dark">Culture Hub</span>
             </h1>
           </div>

@@ -348,7 +348,7 @@ export default function App() {
         <div className="hidden md:flex md:w-[52%] flex-col justify-between p-12 relative overflow-hidden bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 border-r border-slate-200/60 dark:border-slate-800/80 transition-colors duration-300">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-gold text-slate-900 shadow-lg shadow-brand-gold/25 font-black text-xl">K</div>
+            <img src="/logo.png" alt="Kyungsung University Logo" className="h-10 w-10 object-contain" />
             <span className="font-sans text-2xl font-black tracking-tight text-slate-800 dark:text-white">
               KSU <span className="text-brand-gold-dark">Culture Hub</span>
             </span>
@@ -430,7 +430,7 @@ export default function App() {
           {/* Mobile brand */}
           <div className="md:hidden w-full max-w-md flex items-center justify-between mb-8">
             <div className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-gold text-slate-900 font-black">K</div>
+              <img src="/logo.png" alt="Kyungsung University Logo" className="h-8 w-8 object-contain" />
               <span className="font-sans text-lg font-bold text-slate-800 dark:text-slate-100">
                 KSU <span className="text-brand-gold-dark">Culture Hub</span>
               </span>
