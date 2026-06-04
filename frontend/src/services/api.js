@@ -18,7 +18,10 @@ const BASE_URL = getBaseUrl();
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 
+    'Content-Type': 'application/json',
+    'bypass-tunnel-reminder': 'true'
+  },
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -53,7 +56,7 @@ axiosInstance.interceptors.response.use(
       original._retry = true;
       try {
         const refresh = tokenManager.getRefreshToken();
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { token: refresh });
+        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { token: refresh }, { headers: { 'bypass-tunnel-reminder': 'true' } });
         tokenManager.setTokens(data.accessToken, data.refreshToken);
         original.headers['Authorization'] = `Bearer ${data.accessToken}`;
         return axiosInstance(original);
