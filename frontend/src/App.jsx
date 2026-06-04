@@ -57,6 +57,10 @@ export default function App() {
     { id: 1, receiverName: '익명 1', content: '안녕하세요! 공모전 팀원 구인글 보고 연락드립니다.', time: '1시간 전' },
     { id: 2, receiverName: '익명 2', content: '언어 교환 관심있어서 쪽지 보냅니다!', time: '어제' },
   ]);
+  const [receivedMessages, setReceivedMessages] = useState([
+    { id: 101, senderName: 'Sarah Jones', content: '안녕하세요! 공모전 팀원 구인글 보고 연락드립니다. 프론트엔드 파트 지원하고 싶어요!', time: '1시간 전' },
+    { id: 102, senderName: 'Nguyen Min', content: '캠퍼스 투어 관련해서 궁금한 점이 있어서 쪽지 보냅니다.', time: '어제' },
+  ]);
 
   // ── MyPage ────────────────────────────────────────────────────────────────
   const [isMyPageOpen, setIsMyPageOpen] = useState(false);
@@ -236,6 +240,12 @@ export default function App() {
       ...p,
     ]);
     showToast(`${msgReceiverName} 님에게 쪽지를 전송했습니다!`, 'success');
+  };
+
+  const handleReplyMessage = (senderName) => {
+    setIsMyPageOpen(false); // Close MyPage
+    setMsgReceiverName(senderName); // Set receiver
+    setIsMsgModalOpen(true); // Open Message Modal
   };
 
   const handleCreatePost = async (e) => {
@@ -866,6 +876,8 @@ export default function App() {
         setUser={setUser}
         posts={posts}
         sentMessages={sentMessages}
+        receivedMessages={receivedMessages}
+        onReplyMessage={handleReplyMessage}
         onPostClick={handlePostClickFocus}
         onWithdrawal={handleWithdrawal}
         showToast={showToast}

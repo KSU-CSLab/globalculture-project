@@ -12,11 +12,14 @@ export default function MyPageModal({
   setUser,
   posts,
   sentMessages,
+  receivedMessages = [],
+  onReplyMessage,
   onPostClick,
   onWithdrawal,
   showToast,
 }) {
   const [activeTab, setActiveTab]     = useState('posts'); // 'posts' | 'messages' | 'profile'
+  const [messageSubTab, setMessageSubTab] = useState('received'); // 'received' | 'sent'
   const [showConfirmWithdraw, setShowConfirmWithdraw] = useState(false);
 
   // Profile edit states
@@ -104,7 +107,7 @@ export default function MyPageModal({
             <div className="flex border-b border-slate-100 dark:border-slate-800 mb-4">
               {[
                 { key: 'posts',    icon: FileText, label: `내 글 (${myPosts.length})` },
-                { key: 'messages', icon: Send,     label: `쪽지 (${sentMessages.length})` },
+                { key: 'messages', icon: Send,     label: `쪽지 (${receivedMessages.length + sentMessages.length})` },
                 { key: 'profile',  icon: User,     label: '프로필 수정' },
               ].map(({ key, icon: Icon, label }) => (
                 <button
@@ -156,23 +159,80 @@ export default function MyPageModal({
 
               {/* MESSAGES TAB */}
               {activeTab === 'messages' && (
-                sentMessages.length === 0 ? (
-                  <div className="py-16 text-center text-xs font-bold text-slate-400 dark:text-slate-500">
-                    보낸 쪽지 내역이 없습니다. ✉️
+                <div className="space-y-4">
+                  {/* Sub-tabs */}
+                  <div className="flex bg-slate-50 dark:bg-slate-950 p-1 rounded-xl border border-slate-150 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => setMessageSubTab('received')}
+                      className={`flex-1 py-1.5 text-[11px] font-black rounded-lg transition-all ${
+                        messageSubTab === 'received'
+                          ? 'bg-white dark:bg-slate-900 text-brand-gold-dark dark:text-brand-gold shadow-sm'
+                          : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400'
+                      }`}
+                    >
+                      받은 쪽지함 ({receivedMessages.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMessageSubTab('sent')}
+                      className={`flex-1 py-1.5 text-[11px] font-black rounded-lg transition-all ${
+                        messageSubTab === 'sent'
+                          ? 'bg-white dark:bg-slate-900 text-brand-gold-dark dark:text-brand-gold shadow-sm'
+                          : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400'
+                      }`}
+                    >
+                      보낸 쪽지함 ({sentMessages.length})
+                    </button>
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    {sentMessages.map((msg) => (
-                      <div key={msg.id} className="p-3 rounded-xl border border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-extrabold text-brand-gold-dark dark:text-brand-gold">@{msg.receiverName} 님에게 전송</span>
-                          <span className="text-[9px] font-semibold text-slate-400">{msg.time}</span>
-                        </div>
-                        <p className="text-[10.5px] text-slate-600 dark:text-slate-350 leading-relaxed font-medium">{msg.content}</p>
+
+                  {/* Sub-tab content */}
+                  {messageSubTab === 'received' ? (
+                    receivedMessages.length === 0 ? (
+                      <div className="py-12 text-center text-xs font-bold text-slate-400 dark:text-slate-500">
+                        받은 쪽지가 없습니다. ✉️
                       </div>
-                    ))}
-                  </div>
-                )
+                    ) : (
+                      <div className="space-y-2">
+                        {receivedMessages.map((msg) => (
+                          <div key={msg.id} className="p-3 rounded-xl border border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 flex justify-between items-start gap-3">
+                            <div className="space-y-1 flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-extrabold text-brand-gold-dark dark:text-brand-gold">@{msg.senderName}</span>
+                                <span className="text-[9px] font-semibold text-slate-400">{msg.time}</span>
+                              </div>
+                              <p className="text-[10.5px] text-slate-600 dark:text-slate-350 leading-relaxed font-medium">{msg.content}</p>
+                            </div>
+                            <button
+                              onClick={() => onReplyMessage?.(msg.senderName)}
+                              className="px-2.5 py-1.5 text-[10px] font-bold rounded-lg bg-brand-gold text-slate-900 hover:bg-brand-gold-dark hover:scale-[1.02] active:scale-[0.98] transition-all flex-shrink-0"
+                            >
+                              답장
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  ) : (
+                    sentMessages.length === 0 ? (
+                      <div className="py-12 text-center text-xs font-bold text-slate-400 dark:text-slate-500">
+                        보낸 쪽지 내역이 없습니다. ✉️
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {sentMessages.map((msg) => (
+                          <div key={msg.id} className="p-3 rounded-xl border border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-extrabold text-brand-gold-dark dark:text-brand-gold">@{msg.receiverName} 님에게 전송</span>
+                              <span className="text-[9px] font-semibold text-slate-400">{msg.time}</span>
+                            </div>
+                            <p className="text-[10.5px] text-slate-600 dark:text-slate-350 leading-relaxed font-medium">{msg.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  )}
+                </div>
               )}
 
               {/* PROFILE EDIT TAB — PUT /api/users/me */}
