@@ -5,7 +5,15 @@ import axios from 'axios';
 // Backend: Node.js Express @ http://localhost:5000
 // All endpoints prefixed with /api
 // ─────────────────────────────────────────────────────────────────────────────
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://famous-beans-start.loca.lt/api';
+  }
+  return 'http://localhost:5000/api';
+};
+
+const BASE_URL = getBaseUrl();
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
