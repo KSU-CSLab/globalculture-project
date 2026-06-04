@@ -7,7 +7,9 @@ const connectDB = async () => {
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ksu_culture';
 
   try {
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, {
+      bufferCommands: false,
+    });
     console.log(`✅ MongoDB 연결 성공: ${mongoose.connection.host}`);
   } catch (err) {
     console.error('❌ MongoDB 연결 실패:', err.message);
