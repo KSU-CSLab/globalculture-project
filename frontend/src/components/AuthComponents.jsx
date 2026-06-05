@@ -58,8 +58,8 @@ export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForg
     <div className="flex-1 flex flex-col justify-center px-6 py-8 select-none fade-in">
       {/* Visual Header */}
       <div className="flex flex-col items-center text-center mb-8">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-gold text-slate-900 shadow-lg shadow-brand-gold/25 animate-bounce mb-3">
-          <span className="font-extrabold text-2xl">K</span>
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white dark:bg-slate-900 p-2 shadow-lg shadow-slate-100 dark:shadow-none animate-bounce mb-3 border border-slate-200/60 dark:border-slate-800">
+          <img src="/logo.png" alt="Kyungsung University Logo" className="h-full w-full object-contain" />
         </div>
         <h2 className="font-sans text-2xl font-black text-slate-800 dark:text-white tracking-tight leading-none">
           KSU <span className="text-brand-gold-dark">Culture Hub</span>
