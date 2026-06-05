@@ -7,8 +7,40 @@
  */
 const router = require('express').Router();
 const { body } = require('express-validator');
-const { register, login, logout, refresh } = require('../controllers/auth.controller');
+const { register, login, logout, refresh, sendCode } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth');
+
+/**
+ * @swagger
+ * /api/auth/send-code:
+ *   post:
+ *     summary: 이메일 인증 코드 발송
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "example@ks.ac.kr"
+ *     responses:
+ *       200:
+ *         description: 인증 코드 발송 성공
+ *       400:
+ *         description: 유효하지 않은 이메일 형식
+ *       409:
+ *         description: 이미 가입된 이메일
+ */
+router.post(
+  '/send-code',
+  [body('email').isEmail().withMessage('유효한 이메일을 입력해주세요.')],
+  sendCode
+);
 
 /**
  * @swagger
