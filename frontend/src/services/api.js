@@ -8,7 +8,7 @@ import axios from 'axios';
 const getBaseUrl = () => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
   if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
-    return 'https://famous-beans-start.loca.lt/api';
+    return 'https://ksu-culture-hub-api.vercel.app/api';
   }
   return 'http://localhost:5000/api';
 };
