@@ -3,15 +3,27 @@
  */
 const mongoose = require('mongoose');
 
+let cachedDbPromise = null;
+
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ksu_culture';
 
-  try {
-    await mongoose.connect(uri, {
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+
+  if (!cachedDbPromise) {
+    cachedDbPromise = mongoose.connect(uri, {
       bufferCommands: false,
     });
+  }
+
+  try {
+    await cachedDbPromise;
     console.log(`✅ MongoDB 연결 성공: ${mongoose.connection.host}`);
+    return mongoose.connection;
   } catch (err) {
+    cachedDbPromise = null; // Reset cache on failure
     console.error('❌ MongoDB 연결 실패:', err.message);
     throw err;
   }

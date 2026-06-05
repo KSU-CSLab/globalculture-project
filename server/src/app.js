@@ -19,6 +19,21 @@ const postRoutes = require('./routes/post.routes');
 const partnerRoutes = require('./routes/partner.routes');
 
 const app = express();
+const connectDB = require('./config/db');
+
+// Ensure DB is connected before processing requests
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Database connection failed',
+      error: err.message,
+    });
+  }
+});
 
 // ─── 보안 미들웨어 ──────────────────────────────────────
 app.use(helmet());
