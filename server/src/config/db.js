@@ -44,6 +44,8 @@ const seedDemoUsers = async () => {
   }
 };
 
+let seeded = false;
+
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ksu_culture';
 
@@ -61,8 +63,11 @@ const connectDB = async () => {
     await cachedDbPromise;
     console.log(`✅ MongoDB 연결 성공: ${mongoose.connection.host}`);
     
-    // Seed demo accounts in background
-    seedDemoUsers().catch((err) => console.error('Demo seeding failed:', err));
+    // Ensure all demo users are fully created (await) before releasing the connection on startup
+    if (!seeded) {
+      await seedDemoUsers();
+      seeded = true;
+    }
     
     return mongoose.connection;
   } catch (err) {
