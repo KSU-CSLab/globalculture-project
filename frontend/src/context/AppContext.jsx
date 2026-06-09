@@ -150,9 +150,9 @@ export function AppProvider({ children }) {
         const newMap = { ...commentsMap };
         let targetPostId = null;
         for (const postId in newMap) {
-          const idx = newMap[postId].findIndex((c) => c.id === commentId);
+          const idx = newMap[postId].findIndex((c) => (c.id || c._id) === commentId);
           if (idx !== -1) {
-            newMap[postId] = newMap[postId].filter((c) => c.id !== commentId);
+            newMap[postId] = newMap[postId].filter((c) => (c.id || c._id) !== commentId);
             targetPostId = Number(postId);
             break;
           }

@@ -11,6 +11,7 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
   const [isTranslated, setIsTranslated] = useState(false);
 
   const menuRef = useRef(null);
+  const commentId = comment.id || comment._id;
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -28,20 +29,22 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
 
   // Translate toggle handler
   const handleTranslateToggle = async () => {
+    console.log("CommentItem 번역 클릭됨: ID =", commentId, "현재 번역 상태 =", isTranslated);
+
     if (isTranslated) {
       setIsTranslated(false);
       return;
     }
 
-    if (translationCache[comment.id]) {
+    if (translationCache[commentId]) {
       setIsTranslated(true);
       return;
     }
 
     setIsTranslating(true);
     try {
-      const data = await api.getTranslation('comment', comment.id, comment.content);
-      onCacheTranslation(comment.id, data);
+      const data = await api.getTranslation('comment', commentId, comment.content);
+      onCacheTranslation(commentId, data);
       setIsTranslated(true);
     } catch (err) {
       console.error("Comment translation error:", err);
@@ -51,8 +54,8 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
     }
   };
 
-  const currentContent = isTranslated && translationCache[comment.id]
-    ? translationCache[comment.id].translatedContent
+  const currentContent = isTranslated && translationCache[commentId]
+    ? translationCache[commentId].translatedContent
     : comment.content;
 
   const getLanguageLabel = (langCode) => {
@@ -100,7 +103,7 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
-                    onDelete(comment.id);
+                    onDelete(commentId);
                   }}
                   className="flex w-full items-center space-x-1.5 rounded-md px-2.5 py-1.5 text-left text-[11px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
                 >
@@ -208,7 +211,7 @@ export default function CommentSection({
         ) : (
           comments.map((comment) => (
             <CommentItem
-              key={comment.id}
+              key={comment.id || comment._id}
               comment={comment}
               onDelete={onDeleteComment}
               onSendMessage={onSendMessage}
