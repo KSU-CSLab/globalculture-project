@@ -30,8 +30,6 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
 
   // Translate toggle handler
   const handleTranslateToggle = async () => {
-    console.log("CommentItem 번역 클릭됨: ID =", commentId, "현재 번역 상태 =", isTranslated);
-
     if (isTranslated) {
       setIsTranslated(false);
       return;
@@ -70,22 +68,22 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {/* Circular avatar with first initial */}
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 font-bold text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 font-bold text-xs text-slate-500 dark:text-slate-400">
             {comment.author.slice(0, 1)}
           </div>
           <div>
             <div className="flex items-center space-x-1.5">
-              <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200">{comment.author}</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{comment.author}</span>
               {comment.isSelf && (
-                <span className="rounded bg-brand-gold-light dark:bg-brand-gold/10 px-1 py-0.2 text-[8px] font-black text-brand-gold-dark dark:text-brand-gold ring-1 ring-brand-gold/15">
+                <span className="rounded bg-brand-gold-light dark:bg-brand-gold/10 px-1.5 py-0.5 text-[10px] font-black text-brand-gold-dark dark:text-brand-gold ring-1 ring-brand-gold/15">
                   MY
                 </span>
               )}
-              <span className="text-[9px] rounded bg-slate-200/60 dark:bg-slate-800/80 px-1 py-0.2 text-slate-500 dark:text-slate-400 font-medium uppercase">
+              <span className="text-[10px] rounded bg-slate-200/60 dark:bg-slate-800/80 px-1.5 py-0.5 text-slate-500 dark:text-slate-400 font-medium uppercase">
                 {getLanguageLabel(comment.lang || "ko")}
               </span>
             </div>
-            <span className="text-[9px] text-slate-400 dark:text-slate-500 font-normal">{comment.time}</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal">{comment.time}</span>
           </div>
         </div>
 
@@ -93,22 +91,22 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="rounded-full p-1 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-350 transition-colors"
+            className="rounded-full p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-350 transition-colors"
           >
-            <MoreVertical size={14} />
+            <MoreVertical size={15} />
           </button>
 
           {isMenuOpen && (
-            <div className="absolute right-0 mt-1 z-30 w-32 origin-top-right rounded-lg border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-850 p-1 shadow-lg ring-1 ring-black/5 fade-in">
+            <div className="absolute right-0 mt-1 z-30 w-36 origin-top-right rounded-lg border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-850 p-1 shadow-lg ring-1 ring-black/5 fade-in">
               {comment.isSelf ? (
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
                     onDelete(commentId);
                   }}
-                  className="flex w-full items-center space-x-1.5 rounded-md px-2.5 py-1.5 text-left text-[11px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                  className="flex w-full items-center space-x-1.5 rounded-md px-2.5 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
                 >
-                  <Trash2 size={11} />
+                  <Trash2 size={13} />
                   <span>댓글 삭제</span>
                 </button>
               ) : (
@@ -117,9 +115,9 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
                     setIsMenuOpen(false);
                     onSendMessage(comment.author);
                   }}
-                  className="flex w-full items-center space-x-1.5 rounded-md px-2.5 py-1.5 text-left text-[11px] font-bold text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                  className="flex w-full items-center space-x-1.5 rounded-md px-2.5 py-2 text-left text-xs font-bold text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
                 >
-                  <Send size={11} className="text-slate-500 dark:text-slate-455" />
+                  <Send size={13} className="text-slate-500 dark:text-slate-455" />
                   <span>쪽지 보내기</span>
                 </button>
               )}
@@ -130,7 +128,7 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
 
       {/* Comment Body */}
       <div className="mt-2.5">
-        <p className={`font-sans text-[11.5px] leading-relaxed text-slate-700 dark:text-slate-300 transition-all duration-300 ${isTranslated ? 'fade-in' : ''}`}>
+        <p className={`font-sans text-xs leading-relaxed text-slate-700 dark:text-slate-300 transition-all duration-300 ${isTranslated ? 'fade-in' : ''}`}>
           {isTranslating ? (
             <span className="space-y-1 block py-1">
               <span className="block h-3 w-full rounded shimmer dark:bg-slate-800"></span>
@@ -147,7 +145,7 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
         <button
           onClick={handleTranslateToggle}
           disabled={isTranslating}
-          className={`flex items-center space-x-1 rounded-full px-2.5 py-1 text-[9.5px] font-bold transition-all duration-200 select-none ${
+          className={`flex items-center space-x-1 rounded-full px-2.5 py-1 text-xs font-bold transition-all duration-200 select-none ${
             isTranslated
               ? 'bg-brand-gold-light dark:bg-brand-gold/10 text-slate-800 dark:text-brand-gold border border-brand-gold/25 hover:bg-brand-gold/15'
               : 'bg-slate-200/50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'
@@ -155,17 +153,17 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
         >
           {isTranslating ? (
             <>
-              <Globe size={11} className="animate-spin" />
+              <Globe size={12} className="animate-spin" />
               <span>번역 중...</span>
             </>
           ) : isTranslated ? (
             <>
-              <Languages size={11} className="text-brand-gold-dark" />
+              <Languages size={12} className="text-brand-gold-dark" />
               <span>원문 보기</span>
             </>
           ) : (
             <>
-              <Globe size={11} />
+              <Globe size={12} />
               <span>번역하기</span>
             </>
           )}
@@ -231,9 +229,9 @@ export default function CommentSection({
               type="checkbox"
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-brand-gold focus:ring-brand-gold focus:ring-offset-slate-900"
+              className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-brand-gold focus:ring-brand-gold focus:ring-offset-slate-900"
             />
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">익명으로 작성</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">익명으로 작성</span>
           </label>
         </div>
 

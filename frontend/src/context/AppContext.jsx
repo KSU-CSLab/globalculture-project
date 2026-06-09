@@ -244,7 +244,7 @@ export function AppProvider({ children }) {
         category: writeCategory,
         lang: writeLang,
       });
-    } catch {}
+    } catch { }
 
     setPosts([newPost, ...posts]);
     setCommentsMap((p) => ({ ...p, [newPost.id]: [] }));

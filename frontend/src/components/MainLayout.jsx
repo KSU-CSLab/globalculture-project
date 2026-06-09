@@ -79,15 +79,15 @@ export default function MainLayout() {
       {backendOnline === false && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/50 px-4 py-2 flex items-center justify-center space-x-2">
           <WifiOff size={13} className="text-amber-600 dark:text-amber-400" />
-          <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300">
+          <span className="text-xs font-bold text-amber-700 dark:text-amber-300">
             백엔드 서버 연결 불가 — 데모(Mock) 모드로 실행 중 | Backend offline — Running in demo mode
           </span>
         </div>
       )}
       {backendOnline === true && (
         <div className="bg-green-50 dark:bg-green-950/30 border-b border-green-200 dark:border-green-900/50 px-4 py-1.5 flex items-center justify-center space-x-2">
-          <Wifi size={12} className="text-green-600 dark:text-green-400" />
-          <span className="text-[10px] font-bold text-green-700 dark:text-green-300">
+          <Wifi size={13} className="text-green-600 dark:text-green-400" />
+          <span className="text-xs font-bold text-green-700 dark:text-green-300">
             백엔드 서버 연결됨 — GET /api/health ✓
           </span>
         </div>
@@ -111,13 +111,13 @@ export default function MainLayout() {
               </div>
               <div className="flex-1 min-w-0">
                 <span className="block text-xs font-black text-slate-800 dark:text-white truncate">{user?.nickname}</span>
-                <span className="block text-[9px] font-bold text-slate-400 truncate">{user?.email}</span>
+                <span className="block text-xs font-bold text-slate-400 truncate">{user?.email}</span>
               </div>
               <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" />
             </div>
 
             <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
-              <h3 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 pl-1">메뉴</h3>
+              <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 pl-1">메뉴</h3>
               <div className="space-y-1">
                 {[
                   { id: 'community', label: '커뮤니티', icon: Globe },
@@ -147,7 +147,7 @@ export default function MainLayout() {
             {/* Community categories (only when on community page) */}
             {activeSection === 'community' && (
               <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
-                <h3 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 pl-1">카테고리</h3>
+                <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 pl-1">카테고리</h3>
                 <div className="space-y-1">
                   {[
                     { id: 'all',      name: '전체 피드' },
@@ -230,7 +230,7 @@ export default function MainLayout() {
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-800/80 shadow-premium transition-colors duration-300">
               <div className="flex items-center space-x-2 mb-3">
                 <Activity size={13} className="text-brand-gold-dark dark:text-brand-gold" />
-                <h4 className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">백엔드 API 상태</h4>
+                <h4 className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">백엔드 API 상태</h4>
               </div>
               <div className="space-y-1.5">
                 {[
@@ -244,13 +244,13 @@ export default function MainLayout() {
                 ].map(({ method, path, status }) => (
                   <div key={path} className="flex items-center justify-between">
                     <div className="flex items-center space-x-1.5">
-                      <span className={`text-[8px] font-extrabold px-1 py-0.5 rounded ${
+                      <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
                         method === 'GET'    ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400' :
                         method === 'POST'   ? 'bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400'  :
                         method === 'PUT'    ? 'bg-orange-100 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400' :
                                               'bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400'
                       }`}>{method}</span>
-                      <span className="text-[9px] font-mono font-bold text-slate-500 dark:text-slate-400">{path}</span>
+                      <span className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">{path}</span>
                     </div>
                     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
                       status === 'live'    ? 'bg-green-500 animate-pulse' :
@@ -272,11 +272,11 @@ export default function MainLayout() {
                   <Flame size={14} className="text-red-500 fill-current animate-pulse" />
                   <h4 className="text-xs font-black tracking-tight text-slate-800 dark:text-white">HOT 인기글</h4>
                 </div>
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Realtime</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Realtime</span>
               </div>
               <div className="space-y-2.5">
                 {posts.filter((p) => p.likes > 0).sort((a, b) => b.likes - a.likes).slice(0, 3).length === 0 ? (
-                  <div className="py-4 text-center text-[10px] font-bold text-slate-400">아직 인기글이 없습니다. 🔥</div>
+                  <div className="py-4 text-center text-xs font-bold text-slate-400">아직 인기글이 없습니다. 🔥</div>
                 ) : (
                   posts.filter((p) => p.likes > 0).sort((a, b) => b.likes - a.likes).slice(0, 3).map((post, idx) => (
                     <div
@@ -288,8 +288,8 @@ export default function MainLayout() {
                     >
                       <span className="text-xs font-extrabold text-brand-gold-dark dark:text-brand-gold w-4 text-center">{idx + 1}</span>
                       <div className="flex-1 min-w-0">
-                        <span className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-brand-gold-dark dark:group-hover:text-brand-gold transition-colors truncate">{post.title}</span>
-                        <div className="flex items-center space-x-1.5 text-[9px] text-slate-400 mt-0.5">
+                        <span className="block text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-brand-gold-dark dark:group-hover:text-brand-gold transition-colors truncate">{post.title}</span>
+                        <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mt-0.5">
                           <span>{post.author}</span><span>•</span><span className="text-red-500 font-bold">❤️ {post.likes}</span>
                         </div>
                       </div>
@@ -303,12 +303,12 @@ export default function MainLayout() {
           {/* Tip Widget */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-800/80 shadow-premium space-y-2.5 transition-colors duration-300">
             <div className="flex items-center space-x-1.5">
-              <span className="rounded-full bg-brand-gold/20 px-2 py-0.5 text-[8px] font-bold text-brand-gold-dark dark:text-brand-gold border border-brand-gold/30">
+              <span className="rounded-full bg-brand-gold/20 px-2 py-0.5 text-[10px] font-bold text-brand-gold-dark dark:text-brand-gold border border-brand-gold/30">
                 KSU Culture Hub
               </span>
             </div>
-            <h4 className="text-[11px] font-black tracking-tight text-slate-800 dark:text-white">다국어 교류를 잘하는 비결 🌐</h4>
-            <p className="text-[9.5px] leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
+            <h4 className="text-xs font-black tracking-tight text-slate-800 dark:text-white">다국어 교류를 잘하는 비결 🌐</h4>
+            <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
               맞춤법과 띄어쓰기를 정확하게 작성하면 AI 번역 정확도가 높아집니다! 외국인 친구들과 서로의 언어·문화를 나눠보세요.
             </p>
           </div>
@@ -362,8 +362,8 @@ export default function MainLayout() {
                 isActive ? 'text-brand-gold-dark dark:text-brand-gold' : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-white'
               }`}
             >
-              <Icon size={18} className="stroke-[2.25]" />
-              <span className={`text-[8px] font-bold mt-0.5 ${isActive ? 'text-brand-gold-dark dark:text-brand-gold' : ''}`}>{label}</span>
+              <Icon size={20} className="stroke-[2.25]" />
+              <span className={`text-[10px] font-bold mt-0.5 ${isActive ? 'text-brand-gold-dark dark:text-brand-gold' : ''}`}>{label}</span>
               {isActive && <span className="w-1 h-1 rounded-full bg-brand-gold mt-0.5" />}
             </button>
           );

@@ -12,8 +12,8 @@ const formatTimer = (seconds) => {
 // Role display helper
 const ROLE_LABELS = {
   student: '재학생 (Student) 🎓',
-  staff:   '교직원 (Staff)   🏫',
-  admin:   '관리자 (Admin)  👑',
+  staff: '교직원 (Staff)   🏫',
+  admin: '관리자 (Admin)  👑',
 };
 
 // ----------------------------------------------------------------------
@@ -21,10 +21,10 @@ const ROLE_LABELS = {
 // ----------------------------------------------------------------------
 export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForgot, showToast }) {
   const api = useApi();
-  const [email, setEmail]       = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError]       = useState('');
+  const [error, setError] = useState('');
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -49,23 +49,24 @@ export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForg
   };
 
   const handleQuickFill = (type) => {
-    if (type === 'admin')   { setEmail('admin@ks.ac.kr');   setPassword('password123'); }
-    if (type === 'student') { setEmail('student1@ks.ac.kr'); setPassword('password123'); }
-    if (type === 'staff')   { setEmail('staff1@ks.ac.kr');  setPassword('password123'); }
+    setPassword('password123');
+    if (type === 'admin') { setEmail('admin@ks.ac.kr'); }
+    if (type === 'student') { setEmail('student1@ks.ac.kr'); }
+    if (type === 'staff') { setEmail('staff1@ks.ac.kr'); }
     setError('');
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-center px-6 py-8 select-none fade-in">
+    <div className="flex-1 flex flex-col justify-center px-4 py-8 select-none fade-in">
       {/* Visual Header */}
       <div className="flex flex-col items-center text-center mb-8">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white dark:bg-slate-900 p-2 shadow-lg shadow-slate-100 dark:shadow-none animate-bounce mb-3 border border-slate-200/60 dark:border-slate-800">
+        <div className="hidden md:block flex h-14 w-14 items-center justify-center rounded-2xl bg-white dark:bg-slate-900 p-2 shadow-lg shadow-slate-100 dark:shadow-none mb-3 border border-slate-200/60 dark:border-slate-800">
           <img src="/logo.png" alt="Kyungsung University Logo" className="h-full w-full object-contain" />
         </div>
-        <h2 className="font-sans text-2xl font-black text-slate-800 dark:text-white tracking-tight leading-none">
+        <h2 className="hidden md:block font-sans text-2xl font-black text-slate-800 dark:text-white tracking-tight leading-none">
           KSU <span className="text-brand-gold-dark">Culture Hub</span>
         </h2>
-        <p className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs">
+        <p className="mt-2 text-sm md:text-xs font-semibold text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs">
           경성대학교 글로컬 문화 허브<br />
           <span className="text-brand-gold-dark dark:text-brand-gold font-bold">@ks.ac.kr</span> 이메일로 로그인하세요
         </p>
@@ -76,42 +77,42 @@ export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForg
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
+            <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
               학교 이메일 (Email)
             </label>
             <div className="relative flex items-center">
-              <Mail size={15} className="absolute left-3.5 text-slate-400 dark:text-slate-500" />
+              <Mail size={16} className="absolute left-3.5 text-slate-400 dark:text-slate-500" />
               <input
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="example@ks.ac.kr"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-brand-gold focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-brand-gold/20 transition-all duration-200"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-brand-gold focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-brand-gold/20 transition-all duration-200"
               />
             </div>
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
+            <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 pl-1">
               비밀번호 (Password)
             </label>
             <div className="relative flex items-center">
-              <Lock size={15} className="absolute left-3.5 text-slate-400 dark:text-slate-500" />
+              <Lock size={16} className="absolute left-3.5 text-slate-400 dark:text-slate-500" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="비밀번호를 입력하세요"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-brand-gold focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-brand-gold/20 transition-all duration-200"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-brand-gold focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-brand-gold/20 transition-all duration-200"
               />
             </div>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="flex items-center space-x-1.5 rounded-lg bg-red-50 dark:bg-red-950/20 p-2.5 text-[11px] font-semibold text-red-600 dark:text-red-400 fade-in">
-              <AlertCircle size={13} className="flex-shrink-0" />
+            <div className="flex items-center space-x-1.5 rounded-lg bg-red-50 dark:bg-red-950/20 p-2.5 text-xs font-semibold text-red-600 dark:text-red-400 fade-in">
+              <AlertCircle size={15} className="flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -128,7 +129,7 @@ export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForg
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center space-x-1.5 rounded-xl bg-brand-gold py-3.5 text-xs font-bold text-slate-900 shadow-md shadow-brand-gold/20 hover:bg-brand-gold-dark hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 disabled:opacity-60"
+            className="w-full flex items-center justify-center space-x-1.5 rounded-xl bg-brand-gold py-3.5 text-sm font-bold text-slate-900 shadow-md shadow-brand-gold/20 hover:bg-brand-gold-dark hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 disabled:opacity-60"
           >
             {isSubmitting ? (
               <>
@@ -151,9 +152,9 @@ export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForg
           </span>
           <div className="grid grid-cols-3 gap-1.5">
             {[
-              { key: 'admin',   label: '👑 관리자' },
+              { key: 'admin', label: '👑 관리자' },
               { key: 'student', label: '🎓 재학생' },
-              { key: 'staff',   label: '🏫 교직원' },
+              { key: 'staff', label: '🏫 교직원' },
             ].map(({ key, label }) => (
               <button
                 key={key}
@@ -186,21 +187,21 @@ export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForg
 // ----------------------------------------------------------------------
 export function SignUpView({ onNavigateToLogin, showToast }) {
   const api = useApi();
-  const [email, setEmail]               = useState('');
-  const [nickname, setNickname]         = useState('');
-  const [password, setPassword]         = useState('');
+  const [email, setEmail] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [role, setRole]                 = useState('student');
+  const [role, setRole] = useState('student');
   const [preferredLanguage, setPreferredLanguage] = useState('ko');
 
   // Verification
-  const [isCodeSent, setIsCodeSent]         = useState(false);
+  const [isCodeSent, setIsCodeSent] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
-  const [isEmailVerified, setIsEmailVerified]   = useState(false);
-  const [timerSeconds, setTimerSeconds]     = useState(180);
-  const [isTimerActive, setIsTimerActive]   = useState(false);
-  const [isSubmitting, setIsSubmitting]     = useState(false);
-  const [error, setError]                   = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState(180);
+  const [isTimerActive, setIsTimerActive] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const timerRef = useRef(null);
 
@@ -388,17 +389,16 @@ export function SignUpView({ onNavigateToLogin, showToast }) {
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { val: 'student', label: '재학생', icon: '🎓', desc: 'Student' },
-                  { val: 'staff',   label: '교직원', icon: '🏫', desc: 'Staff' },
+                  { val: 'staff', label: '교직원', icon: '🏫', desc: 'Staff' },
                 ].map(({ val, label, icon, desc }) => (
                   <button
                     key={val}
                     type="button"
                     onClick={() => setRole(val)}
-                    className={`rounded-xl p-3 border text-left transition-all ${
-                      role === val
-                        ? 'border-brand-gold bg-brand-gold/10 dark:bg-brand-gold/15'
-                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 hover:border-brand-gold/50'
-                    }`}
+                    className={`rounded-xl p-3 border text-left transition-all ${role === val
+                      ? 'border-brand-gold bg-brand-gold/10 dark:bg-brand-gold/15'
+                      : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 hover:border-brand-gold/50'
+                      }`}
                   >
                     <span className="block text-lg">{icon}</span>
                     <span className={`block text-[11px] font-black mt-1 ${role === val ? 'text-brand-gold-dark dark:text-brand-gold' : 'text-slate-700 dark:text-slate-300'}`}>{label}</span>
@@ -456,15 +456,15 @@ export function ForgotAccountView({ onNavigateToLogin, showToast }) {
   const api = useApi();
   const [activeTab, setActiveTab] = useState('id');
 
-  const [idEmail, setIdEmail]         = useState('');
+  const [idEmail, setIdEmail] = useState('');
   const [foundIdText, setFoundIdText] = useState('');
 
-  const [pwUsername, setPwUsername]   = useState('');
-  const [pwEmail, setPwEmail]         = useState('');
+  const [pwUsername, setPwUsername] = useState('');
+  const [pwEmail, setPwEmail] = useState('');
   const [pwSuccessMsg, setPwSuccessMsg] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError]               = useState('');
+  const [error, setError] = useState('');
 
   const handleTabChange = (tab) => {
     setActiveTab(tab); setError(''); setFoundIdText(''); setPwSuccessMsg('');
@@ -512,11 +512,10 @@ export function ForgotAccountView({ onNavigateToLogin, showToast }) {
           <button
             key={val}
             onClick={() => handleTabChange(val)}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-              activeTab === val
-                ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-white shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
-            }`}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === val
+              ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-white shadow-sm'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+              }`}
           >
             {label}
           </button>
