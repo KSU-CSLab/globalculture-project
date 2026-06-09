@@ -7,7 +7,7 @@
  */
 const router = require('express').Router();
 const { body } = require('express-validator');
-const { register, login, logout, refresh } = require('../controllers/auth.controller');
+const { register, login, logout, refresh, sendVerificationCode, verifyCode } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth');
 
 /**
@@ -126,5 +126,65 @@ router.post('/logout', protect, logout);
  *         description: 새 토큰 발급 성공
  */
 router.post('/refresh', refresh);
+
+/**
+ * @swagger
+ * /api/auth/send-verification:
+ *   post:
+ *     summary: 이메일 인증코드 발송
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "student@ks.ac.kr"
+ *     responses:
+ *       200:
+ *         description: 메일 발송 성공
+ */
+router.post(
+  '/send-verification',
+  [body('email').isEmail().withMessage('유효한 이메일을 입력해주세요.')],
+  sendVerificationCode
+);
+
+/**
+ * @swagger
+ * /api/auth/verify-code:
+ *   post:
+ *     summary: 이메일 인증코드 확인
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, code]
+ *             properties:
+ *               email:
+ *                 type: string
+ *               code:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 인증 완료
+ */
+router.post(
+  '/verify-code',
+  [
+    body('email').isEmail().withMessage('유효한 이메일을 입력해주세요.'),
+    body('code').notEmpty().withMessage('인증번호를 입력해주세요.'),
+  ],
+  verifyCode
+);
 
 module.exports = router;

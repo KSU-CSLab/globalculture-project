@@ -5,23 +5,12 @@ import axios from 'axios';
 // Backend: Node.js Express @ http://localhost:5000
 // All endpoints prefixed with /api
 // ─────────────────────────────────────────────────────────────────────────────
-const getBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
-    return 'https://ksu-culture-hub-api.vercel.app/api';
-  }
-  return 'http://localhost:5000/api';
-};
-
-const BASE_URL = getBaseUrl();
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
-  headers: { 
-    'Content-Type': 'application/json',
-    'bypass-tunnel-reminder': 'true'
-  },
+  headers: { 'Content-Type': 'application/json' },
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -56,7 +45,7 @@ axiosInstance.interceptors.response.use(
       original._retry = true;
       try {
         const refresh = tokenManager.getRefreshToken();
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { token: refresh }, { headers: { 'bypass-tunnel-reminder': 'true' } });
+        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { token: refresh });
         tokenManager.setTokens(data.accessToken, data.refreshToken);
         original.headers['Authorization'] = `Bearer ${data.accessToken}`;
         return axiosInstance(original);
@@ -73,7 +62,9 @@ axiosInstance.interceptors.response.use(
 // MOCK DATA (fallback when backend is not running)
 // Used for demo/development mode when backend is unavailable
 // ─────────────────────────────────────────────────────────────────────────────
-let MOCK_MODE = true; // Dynamically toggled based on health check
+// MOCK_MODE: false = 실제 백엔드 연동, true = 데모(Mock) 모드
+// VITE_API_URL 환경변수가 설정되면 실제 백엔드로 자동 연결됩니다.
+const MOCK_MODE = !import.meta.env.VITE_API_URL;
 
 export const REGISTERED_USERS = [
   {
@@ -404,23 +395,7 @@ export const api = {
       throw new Error('아이디/이메일 또는 비밀번호가 올바르지 않습니다.');
     }
     const { data } = await axiosInstance.post('/auth/login', { email, password });
-    const backendData = data.data; // { user, accessToken, refreshToken }
-    if (backendData && backendData.accessToken) {
-      tokenManager.setTokens(backendData.accessToken, backendData.refreshToken);
-      const mappedUser = {
-        id: backendData.user._id,
-        username: backendData.user.email.split('@')[0],
-        nickname: backendData.user.name,
-        email: backendData.user.email,
-        role: backendData.user.role,
-        preferredLanguage: backendData.user.nationality?.toLowerCase() || 'ko',
-      };
-      return {
-        success: true,
-        user: mappedUser,
-        message: data.message || '로그인 성공',
-      };
-    }
+    tokenManager.setTokens(data.token, data.refreshToken);
     return { success: true, ...data };
   },
 
@@ -453,65 +428,8 @@ export const api = {
       REGISTERED_USERS.push(newUser);
       return { success: true, message: '회원가입이 완료되었습니다! 로그인해 주세요.' };
     }
-    const payload = {
-      name: userData.nickname || userData.email.split('@')[0],
-      email: userData.email,
-      password: userData.password,
-      role: userData.role || 'student',
-      nationality: userData.preferredLanguage?.toUpperCase() || 'KR',
-    };
-    const { data } = await axiosInstance.post('/auth/register', payload);
-    const backendData = data.data; // { user, accessToken, refreshToken }
-    if (backendData && backendData.accessToken) {
-      tokenManager.setTokens(backendData.accessToken, backendData.refreshToken);
-      const mappedUser = {
-        id: backendData.user._id,
-        username: backendData.user.email.split('@')[0],
-        nickname: backendData.user.name,
-        email: backendData.user.email,
-        role: backendData.user.role,
-        preferredLanguage: backendData.user.nationality?.toLowerCase() || 'ko',
-      };
-      return {
-        success: true,
-        user: mappedUser,
-        message: data.message || '회원가입이 완료되었습니다.',
-      };
-    }
+    const { data } = await axiosInstance.post('/auth/register', userData);
     return { success: true, ...data };
-  },
-
-  /**
-   * POST /api/auth/send-verification
-   * Body: { email }
-   */
-  sendVerificationEmail: async (email) => {
-    if (MOCK_MODE) {
-      await mockDelay(800);
-      if (!email.includes('@') || email.length < 5) throw new Error('올바른 이메일 주소를 입력해주세요.');
-      if (!validateKsuEmail(email)) throw new Error(`경성대학교 이메일(${KSU_EMAIL_DOMAIN})만 가입이 가능합니다.`);
-      return {
-        success: true,
-        code: '1234',
-        message: `[인증 코드: 1234]가 ${email}로 발송되었습니다. 3분 이내에 입력해주세요!`,
-      };
-    }
-    const { data } = await axiosInstance.post('/auth/send-verification', { email });
-    return { success: true, message: data.message };
-  },
-
-  /**
-   * POST /api/auth/verify-code
-   * Body: { email, code }
-   */
-  verifyEmailCode: async (email, code) => {
-    if (MOCK_MODE) {
-      await mockDelay(500);
-      if (code === '1234') return { success: true, message: '학교 메일 인증이 완료되었습니다!' };
-      throw new Error('인증 번호가 일치하지 않습니다. 다시 입력해주세요.');
-    }
-    const { data } = await axiosInstance.post('/auth/verify-code', { email, code });
-    return { success: true, message: data.message };
   },
 
   /**
@@ -556,18 +474,6 @@ export const api = {
       throw new Error('사용자 정보를 찾을 수 없습니다.');
     }
     const { data } = await axiosInstance.get('/users/me');
-    const backendUser = data.data;
-    if (backendUser) {
-      const mappedUser = {
-        id: backendUser._id,
-        username: backendUser.email.split('@')[0],
-        nickname: backendUser.name,
-        email: backendUser.email,
-        role: backendUser.role,
-        preferredLanguage: backendUser.nationality?.toLowerCase() || 'ko',
-      };
-      return { success: true, user: mappedUser };
-    }
     return { success: true, user: data };
   },
 
@@ -589,28 +495,7 @@ export const api = {
       }
       throw new Error('사용자를 찾을 수 없습니다.');
     }
-    const payload = {
-      name: updateData.nickname,
-      nationality: updateData.preferredLanguage?.toUpperCase(),
-      department: updateData.department,
-      bio: updateData.bio,
-      studentId: updateData.studentId,
-    };
-    Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
-
-    const { data } = await axiosInstance.put('/users/me', payload);
-    const backendUser = data.data;
-    if (backendUser) {
-      const mappedUser = {
-        id: backendUser._id,
-        username: backendUser.email.split('@')[0],
-        nickname: backendUser.name,
-        email: backendUser.email,
-        role: backendUser.role,
-        preferredLanguage: backendUser.nationality?.toLowerCase() || 'ko',
-      };
-      return { success: true, user: mappedUser, message: data.message || '프로필이 수정되었습니다.' };
-    }
+    const { data } = await axiosInstance.put('/users/me', updateData);
     return { success: true, ...data };
   },
 
@@ -631,7 +516,7 @@ export const api = {
   getEvents: async () => {
     if (MOCK_MODE) return mockSuccess({ success: true, events: MOCK_EVENTS }, 500);
     const { data } = await axiosInstance.get('/events');
-    return { success: true, events: data.data };
+    return { success: true, events: data };
   },
 
   /** GET /api/events/:id */
@@ -642,7 +527,7 @@ export const api = {
       return mockSuccess({ success: true, event });
     }
     const { data } = await axiosInstance.get(`/events/${id}`);
-    return { success: true, event: data.data };
+    return { success: true, event: data };
   },
 
   /** POST /api/events — Admin */
@@ -653,7 +538,7 @@ export const api = {
       return mockSuccess({ success: true, event: newEvent, message: '이벤트가 등록되었습니다.' });
     }
     const { data } = await axiosInstance.post('/events', eventData);
-    return { success: true, message: data.message, event: data.data };
+    return { success: true, ...data };
   },
 
   /** PUT /api/events/:id — Admin */
@@ -665,7 +550,7 @@ export const api = {
       return mockSuccess({ success: true, event: MOCK_EVENTS[idx], message: '이벤트가 수정되었습니다.' });
     }
     const { data } = await axiosInstance.put(`/events/${id}`, eventData);
-    return { success: true, message: data.message, event: data.data };
+    return { success: true, ...data };
   },
 
   /** DELETE /api/events/:id — Admin */
@@ -698,7 +583,7 @@ export const api = {
   getBenefits: async () => {
     if (MOCK_MODE) return mockSuccess({ success: true, benefits: MOCK_BENEFITS }, 500);
     const { data } = await axiosInstance.get('/benefits');
-    return { success: true, benefits: data.data };
+    return { success: true, benefits: data };
   },
 
   /** GET /api/benefits/:id */
@@ -709,7 +594,7 @@ export const api = {
       return mockSuccess({ success: true, benefit });
     }
     const { data } = await axiosInstance.get(`/benefits/${id}`);
-    return { success: true, benefit: data.data };
+    return { success: true, benefit: data };
   },
 
   /** POST /api/benefits/:id/claim */
@@ -724,11 +609,7 @@ export const api = {
       });
     }
     const { data } = await axiosInstance.post(`/benefits/${id}/claim`);
-    return {
-      success: true,
-      couponCode: data.couponCode || `KSU-${id.toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-      message: data.message || '혜택을 수령했습니다!',
-    };
+    return { success: true, ...data };
   },
 
   // ───────────────────────────────────────────────
@@ -739,7 +620,7 @@ export const api = {
   getPosts: async (params = {}) => {
     if (MOCK_MODE) return mockSuccess({ success: true, posts: INITIAL_POSTS }, 400);
     const { data } = await axiosInstance.get('/posts', { params });
-    return { success: true, posts: data.data };
+    return { success: true, posts: data };
   },
 
   /** POST /api/posts */
@@ -756,7 +637,7 @@ export const api = {
       return mockSuccess({ success: true, post: newPost, message: '게시글이 등록되었습니다.' });
     }
     const { data } = await axiosInstance.post('/posts', postData);
-    return { success: true, message: data.message, post: data.data };
+    return { success: true, ...data };
   },
 
   /** PUT /api/posts/:id */
@@ -767,7 +648,7 @@ export const api = {
       return mockSuccess({ success: true, message: '게시글이 수정되었습니다.' });
     }
     const { data } = await axiosInstance.put(`/posts/${id}`, postData);
-    return { success: true, message: data.message, post: data.data };
+    return { success: true, ...data };
   },
 
   /** DELETE /api/posts/:id */
@@ -790,7 +671,7 @@ export const api = {
   getPartners: async () => {
     if (MOCK_MODE) return mockSuccess({ success: true, partners: MOCK_PARTNERS }, 500);
     const { data } = await axiosInstance.get('/partners');
-    return { success: true, partners: data.data };
+    return { success: true, partners: data };
   },
 
   /** POST /api/partners — Admin */
@@ -801,22 +682,16 @@ export const api = {
       return mockSuccess({ success: true, partner: newPartner, message: '파트너사가 등록되었습니다.' });
     }
     const { data } = await axiosInstance.post('/partners', partnerData);
-    return { success: true, message: data.message, partner: data.data };
+    return { success: true, ...data };
   },
 
   // ───────────────────────────────────────────────
   // HEALTH CHECK — /api/health
   // ───────────────────────────────────────────────
   healthCheck: async () => {
-    try {
-      // Always test real backend health
-      const { data } = await axiosInstance.get('/health');
-      MOCK_MODE = false;
-      return data;
-    } catch (err) {
-      MOCK_MODE = true;
-      throw err;
-    }
+    if (MOCK_MODE) return mockSuccess({ status: 'ok', mode: 'mock', timestamp: new Date().toISOString() }, 200);
+    const { data } = await axiosInstance.get('/health');
+    return data;
   },
 
   // ───────────────────────────────────────────────
