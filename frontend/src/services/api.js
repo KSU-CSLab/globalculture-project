@@ -482,6 +482,39 @@ export const api = {
   },
 
   /**
+   * POST /api/auth/send-verification
+   * Body: { email }
+   */
+  sendVerificationEmail: async (email) => {
+    if (MOCK_MODE) {
+      await mockDelay(800);
+      if (!email.includes('@') || email.length < 5) throw new Error('올바른 이메일 주소를 입력해주세요.');
+      if (!validateKsuEmail(email)) throw new Error(`경성대학교 이메일(${KSU_EMAIL_DOMAIN})만 가입이 가능합니다.`);
+      return {
+        success: true,
+        code: '1234',
+        message: `[인증 코드: 1234]가 ${email}로 발송되었습니다. 3분 이내에 입력해주세요!`,
+      };
+    }
+    const { data } = await axiosInstance.post('/auth/send-verification', { email });
+    return { success: true, message: data.message };
+  },
+
+  /**
+   * POST /api/auth/verify-code
+   * Body: { email, code }
+   */
+  verifyEmailCode: async (email, code) => {
+    if (MOCK_MODE) {
+      await mockDelay(500);
+      if (code === '1234') return { success: true, message: '학교 메일 인증이 완료되었습니다!' };
+      throw new Error('인증 번호가 일치하지 않습니다. 다시 입력해주세요.');
+    }
+    const { data } = await axiosInstance.post('/auth/verify-code', { email, code });
+    return { success: true, message: data.message };
+  },
+
+  /**
    * POST /api/auth/logout
    * Clears local tokens
    */
