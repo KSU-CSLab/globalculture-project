@@ -55,14 +55,14 @@ export default function PartnersSection({ user, showToast }) {
             <Handshake size={16} className="text-brand-gold-dark dark:text-brand-gold" />
             <span>글로벌 파트너 <span className="text-brand-gold-dark dark:text-brand-gold">Partners</span></span>
           </h2>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-0.5">
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-bold mt-0.5">
             GET /api/partners — 경성대 글로컬 파트너사 네트워크
           </p>
         </div>
         {user?.role === 'admin' && (
           <button
             onClick={() => setShowCreate(!showCreate)}
-            className="flex items-center space-x-1.5 rounded-xl bg-brand-gold px-3 py-2 text-[11px] font-black text-slate-900 hover:bg-brand-gold-dark transition-all shadow-md shadow-brand-gold/20 active:scale-95"
+            className="flex items-center space-x-1.5 rounded-xl bg-brand-gold px-3 py-2 text-xs font-black text-slate-900 hover:bg-brand-gold-dark transition-all shadow-md shadow-brand-gold/20 active:scale-95"
           >
             <Plus size={13} />
             <span>파트너 등록</span>
@@ -132,17 +132,17 @@ export default function PartnersSection({ user, showToast }) {
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-black text-slate-800 dark:text-white truncate">{partner.name}</h3>
                       <div className="flex items-center space-x-1.5 mt-0.5">
-                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[8.5px] font-extrabold border ${catInfo.cls}`}>
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-extrabold border ${catInfo.cls}`}>
                           {catInfo.label}
                         </span>
-                        <span className="text-[9px] font-bold text-slate-400">
+                        <span className="text-xs font-bold text-slate-400">
                           {countryFlag} {partner.country}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3 flex-1">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3 flex-1">
                     {partner.description}
                   </p>
 
@@ -152,7 +152,7 @@ export default function PartnersSection({ user, showToast }) {
                       href={partner.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-3 flex items-center space-x-1.5 text-[10px] font-bold text-brand-gold-dark dark:text-brand-gold hover:underline"
+                      className="mt-3 flex items-center space-x-1.5 text-xs font-bold text-brand-gold-dark dark:text-brand-gold hover:underline"
                     >
                       <Globe size={11} />
                       <span>파트너 사이트 방문</span>

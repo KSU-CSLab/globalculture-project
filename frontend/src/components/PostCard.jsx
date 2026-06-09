@@ -109,11 +109,11 @@ export default function PostCard({
                 </span>
               )}
               {/* Language Tag */}
-              <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[8.5px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
+              <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
                 {getLanguageLabel(post.lang)}
               </span>
             </div>
-            <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium">{post.time}</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{post.time}</span>
           </div>
         </div>
 
@@ -166,7 +166,7 @@ export default function PostCard({
       {/* Content Area */}
       <div className="mt-3.5">
         {/* Title */}
-        <h2 className={`font-sans text-[13px] font-black text-slate-800 dark:text-white tracking-tight leading-snug transition-all duration-300 ${isTranslated ? 'fade-in' : ''}`}>
+        <h2 className={`font-sans text-sm font-black text-slate-800 dark:text-white tracking-tight leading-snug transition-all duration-300 ${isTranslated ? 'fade-in' : ''}`}>
           {isTranslating ? (
             <span className="block h-4 w-3/4 rounded shimmer dark:bg-slate-800"></span>
           ) : (
@@ -193,7 +193,7 @@ export default function PostCard({
         <button
           onClick={handleTranslateToggle}
           disabled={isTranslating}
-          className={`flex items-center space-x-1.5 rounded-full px-3 py-1.5 text-[10.5px] font-bold transition-all duration-300 select-none ${
+          className={`flex items-center space-x-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-300 select-none ${
             isTranslated
               ? 'bg-brand-gold-light dark:bg-brand-gold/10 text-slate-800 dark:text-brand-gold border border-brand-gold/30 hover:bg-brand-gold/20'
               : 'bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 hover:text-slate-800 dark:hover:text-white'

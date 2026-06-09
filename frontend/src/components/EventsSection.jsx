@@ -97,14 +97,14 @@ export default function EventsSection({ user, showToast }) {
             <Calendar size={16} className="text-brand-gold-dark dark:text-brand-gold" />
             <span>문화 이벤트 <span className="text-brand-gold-dark dark:text-brand-gold">Events</span></span>
           </h2>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-0.5">
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-bold mt-0.5">
             GET /api/events — 경성대 글로컬 이벤트 목록
           </p>
         </div>
         {user?.role === 'admin' && (
           <button
             onClick={() => setShowCreate(!showCreate)}
-            className="flex items-center space-x-1.5 rounded-xl bg-brand-gold px-3 py-2 text-[11px] font-black text-slate-900 hover:bg-brand-gold-dark transition-all shadow-md shadow-brand-gold/20 active:scale-95"
+            className="flex items-center space-x-1.5 rounded-xl bg-brand-gold px-3 py-2 text-xs font-black text-slate-900 hover:bg-brand-gold-dark transition-all shadow-md shadow-brand-gold/20 active:scale-95"
           >
             <Plus size={13} />
             <span>이벤트 등록</span>
@@ -174,23 +174,23 @@ export default function EventsSection({ user, showToast }) {
                     <div className="flex-1 min-w-0">
                       {/* Category + Title */}
                       <div className="flex items-center space-x-2 mb-2">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${catInfo.cls}`}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${catInfo.cls}`}>
                           {catInfo.label}
                         </span>
                         {isFull && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30">
                             마감
                           </span>
                         )}
                       </div>
                       <h3 className="text-sm font-black text-slate-800 dark:text-white leading-snug">{event.title}</h3>
-                      <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{event.description}</p>
+                      <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{event.description}</p>
 
                       {/* Meta */}
-                      <div className="mt-3 flex flex-wrap gap-3 text-[10px] text-slate-500 dark:text-slate-400 font-bold">
-                        <span className="flex items-center space-x-1"><Calendar size={11} /><span>{formatDate(event.date)}</span></span>
-                        <span className="flex items-center space-x-1"><MapPin size={11} /><span>{event.location}</span></span>
-                        <span className="flex items-center space-x-1"><Users size={11} /><span>{event.applicants || 0} / {event.capacity} 명</span></span>
+                      <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500 dark:text-slate-400 font-bold">
+                        <span className="flex items-center space-x-1"><Calendar size={12} /><span>{formatDate(event.date)}</span></span>
+                        <span className="flex items-center space-x-1"><MapPin size={12} /><span>{event.location}</span></span>
+                        <span className="flex items-center space-x-1"><Users size={12} /><span>{event.applicants || 0} / {event.capacity} 명</span></span>
                       </div>
 
                       {/* Progress Bar */}
@@ -202,8 +202,8 @@ export default function EventsSection({ user, showToast }) {
                           />
                         </div>
                         <div className="flex justify-between mt-1">
-                          <span className="text-[9px] font-bold text-slate-400">{pct}% 참가 신청됨</span>
-                          <span className="text-[9px] font-bold text-slate-400">잔여 {Math.max(0, (event.capacity || 0) - (event.applicants || 0))} 석</span>
+                          <span className="text-[10px] font-bold text-slate-400">{pct}% 참가 신청됨</span>
+                          <span className="text-[10px] font-bold text-slate-400">잔여 {Math.max(0, (event.capacity || 0) - (event.applicants || 0))} 석</span>
                         </div>
                       </div>
                     </div>
@@ -222,7 +222,7 @@ export default function EventsSection({ user, showToast }) {
                       <button
                         onClick={() => handleApply(event._id)}
                         disabled={isFull || applying === event._id}
-                        className={`flex items-center space-x-1.5 rounded-xl px-3 py-2 text-[11px] font-bold transition-all active:scale-95 ${
+                        className={`flex items-center space-x-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all active:scale-95 ${
                           isFull
                             ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                             : 'bg-brand-gold text-slate-900 hover:bg-brand-gold-dark shadow-md shadow-brand-gold/20'

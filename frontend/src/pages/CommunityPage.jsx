@@ -45,15 +45,15 @@ export default function CommunityPage() {
       <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-5 text-white shadow-premium relative overflow-hidden select-none border border-slate-800/80">
         <div className="relative z-10">
           <div className="flex items-center space-x-2">
-            <span className="rounded-full bg-brand-gold/20 px-2 py-0.5 text-[9px] font-bold text-brand-gold border border-brand-gold/30">Community Feed</span>
-            <span className="text-[10px] text-slate-300 font-semibold flex items-center">
-              <Globe size={10} className="mr-1 animate-pulse" />실시간 다국어 지원
+            <span className="rounded-full bg-brand-gold/20 px-2 py-0.5 text-xs font-bold text-brand-gold border border-brand-gold/30">Community Feed</span>
+            <span className="text-xs text-slate-300 font-semibold flex items-center">
+              <Globe size={11} className="mr-1 animate-pulse" />실시간 다국어 지원
             </span>
           </div>
           <h3 className="mt-2 text-xs font-black tracking-tight text-white sm:text-sm">
             유학생 친구들과 자유롭게 소통하세요!
           </h3>
-          <p className="mt-1 text-[10px] leading-relaxed text-slate-300 font-medium">
+          <p className="mt-1 text-xs leading-relaxed text-slate-300 font-medium">
             <span className="text-brand-gold font-bold">🌐 번역하기 / Translate</span> 버튼으로 AI 실시간 번역 지원
           </p>
         </div>
@@ -76,11 +76,11 @@ export default function CommunityPage() {
           <form onSubmit={handleCreatePost} className="p-4 space-y-3.5 fade-in">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
               <span className="text-xs font-black text-slate-800 dark:text-white">새 교류글 올리기 ✍️</span>
-              <button type="button" onClick={() => setIsWriteOpen(false)} className="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-white">취소</button>
+              <button type="button" onClick={() => setIsWriteOpen(false)} className="text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-white">취소</button>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[9px] font-bold text-slate-400 mb-1">카테고리</label>
+                <label className="block text-xs font-bold text-slate-400 mb-1">카테고리</label>
                 <select value={writeCategory} onChange={(e) => setWriteCategory(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-brand-gold">
                   <option value="contest">공모전 팀원모집</option>
@@ -89,7 +89,7 @@ export default function CommunityPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-[9px] font-bold text-slate-400 mb-1">작성 언어</label>
+                <label className="block text-xs font-bold text-slate-400 mb-1">작성 언어</label>
                 <select value={writeLang} onChange={(e) => setWriteLang(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-brand-gold">
                   <option value="ko">한국어 (KO)</option>
