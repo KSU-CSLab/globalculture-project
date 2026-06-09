@@ -97,7 +97,12 @@ exports.sendVerificationCode = async (req, res, next) => {
       message: '인증 메일이 발송되었습니다. 경성대 메일함을 확인해주세요!',
     });
   } catch (err) {
-    next(err);
+    console.error("💥 이메일 전송 중 에러 발생:", err);
+    return res.status(500).json({
+      success: false,
+      message: '서버 내부 오류로 이메일 발송에 실패했습니다.',
+      error: err.message
+    });
   }
 };
 
