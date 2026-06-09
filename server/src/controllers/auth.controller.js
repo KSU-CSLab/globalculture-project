@@ -4,20 +4,9 @@
  */
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const Verification = require('../models/Verification');
-
-// ── Nodemailer SMTP Transporter ──────────────────────────
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.naver.com',
-  port: parseInt(process.env.SMTP_PORT || '465', 10),
-  secure: parseInt(process.env.SMTP_PORT || '465', 10) === 465,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const axios = require('axios');
 
 // ── JWT 토큰 생성 헬퍼 ─────────────────────────────────
 const generateTokens = (userId) => {
@@ -67,11 +56,7 @@ exports.sendVerificationCode = async (req, res, next) => {
     await Verification.create({ email, code });
 
     // SMTP 전송 옵션
-    const mailOptions = {
-      from: `"KSU Culture Hub" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: '[KSU Culture Hub] 경성대학교 이메일 인증번호',
-      html: `
+    const mailContent = `
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
           <h2 style="color: #d97706; font-size: 20px; font-weight: 800; margin-bottom: 16px;">경성대 글로컬 컬쳐 허브</h2>
           <p style="font-size: 14px; color: #475569; line-height: 1.6;">
@@ -86,11 +71,25 @@ exports.sendVerificationCode = async (req, res, next) => {
             * 본인이 요청하지 않은 경우 이 메일을 무시하셔도 됩니다.
           </p>
         </div>
-      `,
-    };
+      `;
 
     // 이메일 발송
-    await transporter.sendMail(mailOptions);
+    await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: { name: 'KSU Culture Hub', email: process.env.SMTP_USER },
+        to: [{ email: email }],
+        subject: '[KSU Culture Hub] 경성대학교 이메일 인증번호',
+        htmlContent: mailContent,
+      },
+      {
+        headers: {
+          'accept': 'application/json',
+          'content-type': 'application/json',
+          'api-key': process.env.SMTP_PASS,
+        },
+      },
+    )
 
     res.json({
       success: true,

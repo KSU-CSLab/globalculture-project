@@ -2,10 +2,6 @@
  * app.js — Express 앱 설정
  * KSU 글로컬 컬쳐 허브
  */
-const dns = require('dns');
-if (dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder('ipv4first');
-}
 
 const express = require('express');
 const cors = require('cors');
