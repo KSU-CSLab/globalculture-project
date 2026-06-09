@@ -598,7 +598,7 @@ export const api = {
   getEvents: async () => {
     if (MOCK_MODE) return mockSuccess({ success: true, events: MOCK_EVENTS }, 500);
     const { data } = await axiosInstance.get('/events');
-    return { success: true, events: data };
+    return { success: true, events: data.data };
   },
 
   /** GET /api/events/:id */
@@ -609,7 +609,7 @@ export const api = {
       return mockSuccess({ success: true, event });
     }
     const { data } = await axiosInstance.get(`/events/${id}`);
-    return { success: true, event: data };
+    return { success: true, event: data.data };
   },
 
   /** POST /api/events — Admin */
@@ -620,7 +620,7 @@ export const api = {
       return mockSuccess({ success: true, event: newEvent, message: '이벤트가 등록되었습니다.' });
     }
     const { data } = await axiosInstance.post('/events', eventData);
-    return { success: true, ...data };
+    return { success: true, message: data.message, event: data.data };
   },
 
   /** PUT /api/events/:id — Admin */
@@ -632,7 +632,7 @@ export const api = {
       return mockSuccess({ success: true, event: MOCK_EVENTS[idx], message: '이벤트가 수정되었습니다.' });
     }
     const { data } = await axiosInstance.put(`/events/${id}`, eventData);
-    return { success: true, ...data };
+    return { success: true, message: data.message, event: data.data };
   },
 
   /** DELETE /api/events/:id — Admin */
@@ -665,7 +665,7 @@ export const api = {
   getBenefits: async () => {
     if (MOCK_MODE) return mockSuccess({ success: true, benefits: MOCK_BENEFITS }, 500);
     const { data } = await axiosInstance.get('/benefits');
-    return { success: true, benefits: data };
+    return { success: true, benefits: data.data };
   },
 
   /** GET /api/benefits/:id */
@@ -676,7 +676,7 @@ export const api = {
       return mockSuccess({ success: true, benefit });
     }
     const { data } = await axiosInstance.get(`/benefits/${id}`);
-    return { success: true, benefit: data };
+    return { success: true, benefit: data.data };
   },
 
   /** POST /api/benefits/:id/claim */
@@ -691,7 +691,11 @@ export const api = {
       });
     }
     const { data } = await axiosInstance.post(`/benefits/${id}/claim`);
-    return { success: true, ...data };
+    return {
+      success: true,
+      couponCode: data.couponCode || `KSU-${id.toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+      message: data.message || '혜택을 수령했습니다!',
+    };
   },
 
   // ───────────────────────────────────────────────
@@ -702,7 +706,7 @@ export const api = {
   getPosts: async (params = {}) => {
     if (MOCK_MODE) return mockSuccess({ success: true, posts: INITIAL_POSTS }, 400);
     const { data } = await axiosInstance.get('/posts', { params });
-    return { success: true, posts: data };
+    return { success: true, posts: data.data };
   },
 
   /** POST /api/posts */
@@ -719,7 +723,7 @@ export const api = {
       return mockSuccess({ success: true, post: newPost, message: '게시글이 등록되었습니다.' });
     }
     const { data } = await axiosInstance.post('/posts', postData);
-    return { success: true, ...data };
+    return { success: true, message: data.message, post: data.data };
   },
 
   /** PUT /api/posts/:id */
@@ -730,7 +734,7 @@ export const api = {
       return mockSuccess({ success: true, message: '게시글이 수정되었습니다.' });
     }
     const { data } = await axiosInstance.put(`/posts/${id}`, postData);
-    return { success: true, ...data };
+    return { success: true, message: data.message, post: data.data };
   },
 
   /** DELETE /api/posts/:id */
@@ -753,7 +757,7 @@ export const api = {
   getPartners: async () => {
     if (MOCK_MODE) return mockSuccess({ success: true, partners: MOCK_PARTNERS }, 500);
     const { data } = await axiosInstance.get('/partners');
-    return { success: true, partners: data };
+    return { success: true, partners: data.data };
   },
 
   /** POST /api/partners — Admin */
@@ -764,7 +768,7 @@ export const api = {
       return mockSuccess({ success: true, partner: newPartner, message: '파트너사가 등록되었습니다.' });
     }
     const { data } = await axiosInstance.post('/partners', partnerData);
-    return { success: true, ...data };
+    return { success: true, message: data.message, partner: data.data };
   },
 
   // ───────────────────────────────────────────────
