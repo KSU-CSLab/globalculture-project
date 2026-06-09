@@ -28,6 +28,8 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
 
   // Translate toggle handler
   const handleTranslateToggle = async () => {
+    console.log("CommentItem 번역 클릭됨: ID =", comment.id, "현재 번역 상태 =", isTranslated);
+
     if (isTranslated) {
       setIsTranslated(false);
       return;

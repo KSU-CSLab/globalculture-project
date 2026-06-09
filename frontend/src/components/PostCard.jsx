@@ -37,6 +37,7 @@ export default function PostCard({
   // Handle Translate API with caching simulation
   const handleTranslateToggle = async (e) => {
     e.stopPropagation(); // Prevent card expansion toggle
+    console.log("PostCard 번역 클릭됨: ID =", post.id, "현재 번역 상태 =", isTranslated);
 
     if (isTranslated) {
       // Toggle back to original text immediately

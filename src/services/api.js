@@ -700,6 +700,7 @@ export const api = {
 
   /** Translation via backend router */
   getTranslation: async (type, id, originalText, originalTitle = '') => {
+    console.log("api.getTranslation 호출됨:", { type, id, MOCK_MODE, originalTitle, textSnippet: originalText?.slice(0, 30) });
     if (MOCK_MODE) {
       await mockDelay(600);
       if (type === 'post') {
