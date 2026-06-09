@@ -17,6 +17,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  tls: {
+    rejectUnauthorized: false, // TLS 인증서 보안 경고 무시 (SMTP 발송 호환성 강화)
+  },
 });
 
 // ── JWT 토큰 생성 헬퍼 ─────────────────────────────────
@@ -60,11 +63,12 @@ exports.sendVerificationCode = async (req, res, next) => {
     // 랜덤 4자리 숫자 생성
     const code = Math.floor(1000 + Math.random() * 9000).toString();
 
-    // 기존 발송 정보 삭제
-    await Verification.deleteMany({ email });
-
-    // DB 저장 (3분 만료)
-    await Verification.create({ email, code });
+    // DB 저장 (기존 정보 덮어쓰기 및 만료시간 갱신 - upsert를 통해 중복 키 오류 방지)
+    await Verification.findOneAndUpdate(
+      { email },
+      { code, createdAt: new Date() },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
 
     // SMTP 전송 옵션
     const mailOptions = {
@@ -89,8 +93,16 @@ exports.sendVerificationCode = async (req, res, next) => {
       `,
     };
 
-    // 이메일 발송
-    await transporter.sendMail(mailOptions);
+    // 이메일 발송 시도 및 실패 시 상세 로깅
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (mailErr) {
+      console.error('❌ [SMTP ERROR] 이메일 전송 실패 상세 정보:', mailErr);
+      return res.status(500).json({
+        success: false,
+        message: `인증 메일 전송 중 오류가 발생했습니다. SMTP 설정을 확인해주세요. (${mailErr.message})`,
+      });
+    }
 
     res.json({
       success: true,
