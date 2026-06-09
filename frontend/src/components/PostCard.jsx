@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MoreVertical, Heart, MessageCircle, Globe, Trash2, Send, Languages } from 'lucide-react';
 import { api } from '../services/api';
+import { useAppContext } from '../context/AppContext';
 
 export default function PostCard({
   post,
@@ -12,6 +13,7 @@ export default function PostCard({
   onCacheTranslation,
   onLikeToggle
 }) {
+  const { showToast } = useAppContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isTranslated, setIsTranslated] = useState(false);
@@ -48,17 +50,17 @@ export default function PostCard({
       return;
     }
 
-    // If not cached, call simulated API with loading effect
+    // If not cached, call real Gemini API via frontend api helper
     setIsTranslating(true);
     try {
-      // Mock API call simulation with axios pattern
-      const data = await api.getTranslation('post', post.id, post.content);
+      const data = await api.getTranslation('post', post.id, post.content, post.title);
       
       // Store in cache
       onCacheTranslation(post.id, data);
       setIsTranslated(true);
     } catch (error) {
       console.error("Translation API error:", error);
+      showToast(error.message || "번역에 실패했습니다. API 키 설정을 확인해 주세요.", "error");
     } finally {
       setIsTranslating(false);
     }
