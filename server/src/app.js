@@ -17,6 +17,7 @@ const eventRoutes = require('./routes/event.routes');
 const benefitRoutes = require('./routes/benefit.routes');
 const postRoutes = require('./routes/post.routes');
 const partnerRoutes = require('./routes/partner.routes');
+const translateRoutes = require('./routes/translate.routes');
 
 const app = express();
 const connectDB = require('./config/db');
@@ -97,6 +98,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/benefits', benefitRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/partners', partnerRoutes);
+app.use('/api/translate', translateRoutes);
 
 // ─── 404 처리 ────────────────────────────────────────────
 app.use((req, res) => {

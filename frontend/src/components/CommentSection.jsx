@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MoreVertical, Trash2, Send, Globe, Languages } from 'lucide-react';
 import { api } from '../services/api';
+import { useAppContext } from '../context/AppContext';
 
 // Individual Comment Item Component
 function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCacheTranslation }) {
+  const { showToast } = useAppContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isTranslated, setIsTranslated] = useState(false);
@@ -43,6 +45,7 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
       setIsTranslated(true);
     } catch (err) {
       console.error("Comment translation error:", err);
+      showToast(err.message || "댓글 번역에 실패했습니다. API 키 설정을 확인해 주세요.", "error");
     } finally {
       setIsTranslating(false);
     }

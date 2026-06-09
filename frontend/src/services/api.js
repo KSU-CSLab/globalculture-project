@@ -823,17 +823,33 @@ export const api = {
   // LEGACY / UTILITY (kept for backward compatibility)
   // ───────────────────────────────────────────────
 
-  /** Translation (simulated — replace with real translation API) */
-  getTranslation: async (type, id, originalText) => {
-    await mockDelay(800);
-    if (type === 'post') {
-      const post = INITIAL_POSTS.find((p) => p.id === id);
-      if (post) return { translatedTitle: post.translatedTitle, translatedContent: post.translatedContent };
+  /** Translation via backend router */
+  getTranslation: async (type, id, originalText, originalTitle = '') => {
+    if (MOCK_MODE) {
+      await mockDelay(600);
+      if (type === 'post') {
+        const post = INITIAL_POSTS.find((p) => p.id === id);
+        if (post) return { translatedTitle: post.translatedTitle, translatedContent: post.translatedContent };
+      }
+      return {
+        translatedTitle: `[Translated] ${originalText?.slice(0, 20)}...`,
+        translatedContent: `[Translation] ${originalText}`,
+      };
     }
-    return {
-      translatedTitle: `[Translated] ${originalText?.slice(0, 20)}...`,
-      translatedContent: `[Translation] ${originalText}`,
-    };
+
+    const browserLang = navigator.language || 'ko';
+
+    const { data } = await axiosInstance.post('/translate', {
+      type,
+      originalText,
+      originalTitle,
+      targetLang: browserLang,
+    });
+
+    if (data && data.success && data.data) {
+      return data.data;
+    }
+    throw new Error(data?.message || '번역에 실패했습니다.');
   },
 
   /** Send message (DM) — simulated */
