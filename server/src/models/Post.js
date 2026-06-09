@@ -7,6 +7,8 @@ const commentSchema = new mongoose.Schema(
   {
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, required: true, maxlength: 1000 },
+    lang: { type: String, default: 'ko' },
+    isAnonymous: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
@@ -27,6 +29,10 @@ const postSchema = new mongoose.Schema(
       type: String,
       enum: ['notice', 'free', 'question', 'exchange', 'promotion'],
       default: 'free',
+    },
+    lang: {
+      type: String,
+      default: 'ko',
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,

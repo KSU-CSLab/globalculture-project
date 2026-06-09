@@ -15,7 +15,7 @@ exports.getPosts = async (req, res, next) => {
     const [posts, total] = await Promise.all([
       Post.find(filter)
         .populate('author', 'name avatar role')
-        .select('-content -comments') // 목록에서 무거운 필드 제외
+        .select('-content') // 목록에서 본문 제외 (댓글 수 계산을 위해 comments는 포함)
         .skip((page - 1) * limit)
         .limit(Number(limit))
         .sort({ isPinned: -1, createdAt: -1 }),
@@ -124,7 +124,12 @@ exports.addComment = async (req, res, next) => {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ success: false, message: '게시글을 찾을 수 없습니다.' });
 
-    post.comments.push({ author: req.user._id, content: req.body.content });
+    post.comments.push({
+      author: req.user._id,
+      content: req.body.content,
+      lang: req.body.lang || 'ko',
+      isAnonymous: req.body.isAnonymous || false,
+    });
     await post.save();
     await post.populate('comments.author', 'name avatar');
 
@@ -133,3 +138,27 @@ exports.addComment = async (req, res, next) => {
     next(err);
   }
 };
+
+// DELETE /api/posts/:id/comments/:commentId
+exports.deleteComment = async (req, res, next) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ success: false, message: '게시글을 찾을 수 없습니다.' });
+
+    const comment = post.comments.id(req.params.commentId);
+    if (!comment) return res.status(404).json({ success: false, message: '댓글을 찾을 수 없습니다.' });
+
+    const isOwner = comment.author.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ success: false, message: '삭제 권한이 없습니다.' });
+    }
+
+    comment.deleteOne();
+    await post.save();
+    res.json({ success: true, message: '댓글이 삭제되었습니다.' });
+  } catch (err) {
+    next(err);
+  }
+};
+

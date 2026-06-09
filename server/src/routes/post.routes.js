@@ -7,7 +7,7 @@
  */
 const router = require('express').Router();
 const {
-  getPosts, getPost, createPost, updatePost, deletePost, toggleLike, addComment,
+  getPosts, getPost, createPost, updatePost, deletePost, toggleLike, addComment, deleteComment,
 } = require('../controllers/post.controller');
 const { protect } = require('../middleware/auth');
 const upload = require('../middleware/upload');
@@ -89,5 +89,14 @@ router.post('/:id/like', toggleLike);
  *     tags: [Posts]
  */
 router.post('/:id/comments', addComment);
+
+/**
+ * @swagger
+ * /api/posts/{id}/comments/{commentId}:
+ *   delete:
+ *     summary: 댓글 삭제 (작성자 또는 Admin)
+ *     tags: [Posts]
+ */
+router.delete('/:id/comments/:commentId', deleteComment);
 
 module.exports = router;
