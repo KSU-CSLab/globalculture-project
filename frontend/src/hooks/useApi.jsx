@@ -271,6 +271,11 @@ export function useApi() {
       return { success: true, posts: data.data };
     },
 
+    getPost: async (id) => {
+      const { data } = await axiosInstance.get(`/posts/${id}`);
+      return { success: true, post: data.data };
+    },
+
     createPost: async (postData) => {
       const { data } = await axiosInstance.post('/posts', postData);
       return { success: true, message: data.message, post: data.data };
@@ -286,8 +291,19 @@ export function useApi() {
       return { success: true, ...data };
     },
 
-    deleteComment: async (id) => {
-      return { success: true, message: '댓글이 삭제되었습니다.' };
+    toggleLike: async (id) => {
+      const { data } = await axiosInstance.post(`/posts/${id}/like`);
+      return { success: true, likeCount: data.likeCount, liked: data.liked };
+    },
+
+    addComment: async (postId, commentData) => {
+      const { data } = await axiosInstance.post(`/posts/${postId}/comments`, commentData);
+      return { success: true, message: data.message, comments: data.data };
+    },
+
+    deleteComment: async (postId, commentId) => {
+      const { data } = await axiosInstance.delete(`/posts/${postId}/comments/${commentId}`);
+      return { success: true, message: data.message };
     },
 
     // ── PARTNERS ──
