@@ -40,9 +40,22 @@ app.use(async (req, res, next) => {
 app.use(helmet());
 
 // ─── CORS 설정 ──────────────────────────────────────────
-const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000')
-  .split(',')
-  .map((o) => o.trim());
+const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+const allowedOrigins = clientOrigin.split(',').map((o) => o.trim());
+
+// 로컬 개발 및 Swagger 테스트를 위해 로컬 호스트 주소들을 항상 허용 목록에 추가
+const devOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5000',
+  'http://127.0.0.1:5173'
+];
+devOrigins.forEach((origin) => {
+  if (!allowedOrigins.includes(origin)) {
+    allowedOrigins.push(origin);
+  }
+});
 
 app.use(
   cors({
