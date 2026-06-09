@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, INITIAL_POSTS, INITIAL_COMMENTS } from '../services/api';
+import { useApi, INITIAL_POSTS, INITIAL_COMMENTS } from '../hooks/useApi';
 
 const AppContext = createContext();
 
 export function AppProvider({ children }) {
   const navigate = useNavigate();
+  const api = useApi();
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   const [user, setUser] = useState(null);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Gift, Tag, Clock, Users, Loader2, AlertCircle, CheckCircle2, Copy } from 'lucide-react';
-import { api } from '../services/api';
+import { useApi } from '../hooks/useApi';
 
 const CAT_STYLES = {
   food:      { label: '음식/카페',   cls: 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30' },
@@ -13,6 +13,7 @@ const CAT_STYLES = {
 const ROLE_LABELS = { student: '재학생', staff: '교직원', admin: '관리자' };
 
 export default function BenefitsSection({ user, showToast }) {
+  const api = useApi();
   const [benefits, setBenefits]   = useState([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState('');

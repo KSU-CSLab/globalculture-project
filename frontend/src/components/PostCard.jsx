@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MoreVertical, Heart, MessageCircle, Globe, Trash2, Send, Languages } from 'lucide-react';
-import { api } from '../services/api';
+import { useApi } from '../hooks/useApi';
 import { useAppContext } from '../context/AppContext';
 
 export default function PostCard({
@@ -13,6 +13,7 @@ export default function PostCard({
   onCacheTranslation,
   onLikeToggle
 }) {
+  const api = useApi();
   const { showToast } = useAppContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);

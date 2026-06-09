@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, FileText, Send, Trash2, AlertTriangle, ShieldAlert, User, Globe, Save, Loader2 } from 'lucide-react';
-import { api } from '../services/api';
+import { useApi } from '../hooks/useApi';
 
 const ROLE_LABELS = { admin: '관리자 👑', staff: '교직원 🏫', student: '재학생 🎓' };
 const LANG_LABELS  = { ko: '한국어 🇰🇷', en: 'English 🇺🇸', zh: '中文 🇨🇳', vi: 'Tiếng Việt 🇻🇳' };
@@ -18,6 +18,7 @@ export default function MyPageModal({
   onWithdrawal,
   showToast,
 }) {
+  const api = useApi();
   const [activeTab, setActiveTab]     = useState('posts'); // 'posts' | 'messages' | 'profile'
   const [messageSubTab, setMessageSubTab] = useState('received'); // 'received' | 'sent'
   const [showConfirmWithdraw, setShowConfirmWithdraw] = useState(false);

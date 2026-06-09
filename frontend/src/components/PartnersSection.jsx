@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Handshake, Globe, ExternalLink, Plus, Loader2, AlertCircle, Building2 } from 'lucide-react';
-import { api } from '../services/api';
+import { useApi } from '../hooks/useApi';
 
 const CAT_STYLES = {
   education: { label: '교육',   cls: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30' },
@@ -13,6 +13,7 @@ const CAT_STYLES = {
 const COUNTRY_FLAGS = { '대한민국': '🇰🇷', '미국': '🇺🇸', '중국': '🇨🇳', '일본': '🇯🇵', '베트남': '🇻🇳', '국제': '🌐' };
 
 export default function PartnersSection({ user, showToast }) {
+  const api = useApi();
   const [partners, setPartners] = useState([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');

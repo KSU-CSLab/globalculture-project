@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Clock, CheckCircle2, Loader2, AlertCircle, Plus, Trash2 } from 'lucide-react';
-import { api } from '../services/api';
+import { useApi } from '../hooks/useApi';
 
 const CATEGORY_LABELS = {
   cultural: { label: '문화', cls: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30' },
@@ -18,6 +18,7 @@ const progressPct = (applicants, capacity) =>
   Math.min(100, Math.round(((applicants || 0) / (capacity || 1)) * 100));
 
 export default function EventsSection({ user, showToast }) {
+  const api = useApi();
   const [events, setEvents]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');

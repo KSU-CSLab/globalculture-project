@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MoreVertical, Trash2, Send, Globe, Languages } from 'lucide-react';
-import { api } from '../services/api';
+import { useApi } from '../hooks/useApi';
 import { useAppContext } from '../context/AppContext';
 
 // Individual Comment Item Component
 function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCacheTranslation }) {
   const { showToast } = useAppContext();
+  const api = useApi();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isTranslated, setIsTranslated] = useState(false);

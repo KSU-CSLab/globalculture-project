@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Send, X, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { api } from '../services/api';
+import { useApi } from '../hooks/useApi';
 
 export default function MessageModal({ isOpen, onClose, receiverName, onMessageSent }) {
+  const api = useApi();
   const [messageText, setMessageText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState('idle'); // idle | success | error

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User, Lock, Mail, Key, ChevronLeft, Check, CheckCircle2, Clock, AlertCircle, Sparkles, Globe, ShieldCheck } from 'lucide-react';
-import { api, KSU_EMAIL_DOMAIN, validateKsuEmail } from '../services/api';
+import { useApi, KSU_EMAIL_DOMAIN, validateKsuEmail } from '../hooks/useApi';
 
 // Helper for countdown timer display (MM:SS)
 const formatTimer = (seconds) => {
@@ -20,6 +20,7 @@ const ROLE_LABELS = {
 // A. LOGIN VIEW
 // ----------------------------------------------------------------------
 export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForgot, showToast }) {
+  const api = useApi();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -184,6 +185,7 @@ export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForg
 // B. SIGN UP VIEW — @ks.ac.kr 도메인 + 역할 선택
 // ----------------------------------------------------------------------
 export function SignUpView({ onNavigateToLogin, showToast }) {
+  const api = useApi();
   const [email, setEmail]               = useState('');
   const [nickname, setNickname]         = useState('');
   const [password, setPassword]         = useState('');
@@ -451,6 +453,7 @@ export function SignUpView({ onNavigateToLogin, showToast }) {
 // C. FORGOT ACCOUNT VIEW
 // ----------------------------------------------------------------------
 export function ForgotAccountView({ onNavigateToLogin, showToast }) {
+  const api = useApi();
   const [activeTab, setActiveTab] = useState('id');
 
   const [idEmail, setIdEmail]         = useState('');
