@@ -28,7 +28,6 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
     };
   }, [isMenuOpen]);
 
-  // Translate toggle handler
   const handleTranslateToggle = async () => {
     console.log("[디버깅] 현재 댓글 ID:", commentId);
 
@@ -42,9 +41,15 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
       return;
     }
 
+    const contentToTranslate = comment.content || '';
+    if (!contentToTranslate.trim()) {
+      showToast("번역할 댓글 내용이 비어 있습니다.", "warning");
+      return;
+    }
+
     setIsTranslating(true);
     try {
-      const data = await api.getTranslation('comment', commentId, comment.content);
+      const data = await api.getTranslation('comment', commentId, contentToTranslate);
       onCacheTranslation(commentId, data);
       setIsTranslated(true);
       const translatedText = data.translatedContent;

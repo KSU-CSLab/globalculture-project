@@ -52,10 +52,22 @@ export default function PostCard({
       return;
     }
 
-    // If not cached, call real Gemini API via frontend api helper
     setIsTranslating(true);
     try {
-      const data = await api.getTranslation('post', post.id, post.content, post.title);
+      let contentToTranslate = post.content;
+      let titleToTranslate = post.title;
+
+      // 만약 목록 피드 화면이어서 본문(content)이 없는 경우, 먼저 본문을 상세 조회함
+      if (!contentToTranslate || contentToTranslate.trim() === '') {
+        console.log("[디버깅] 게시글 본문이 비어있음. 번역을 위해 상세 데이터 fetch 시도. ID:", post.id);
+        const detailRes = await api.getPost(post.id);
+        if (detailRes.success && detailRes.post) {
+          contentToTranslate = detailRes.post.content || '';
+          titleToTranslate = detailRes.post.title || post.title;
+        }
+      }
+
+      const data = await api.getTranslation('post', post.id, contentToTranslate, titleToTranslate);
       
       // Store in cache
       onCacheTranslation(post.id, data);

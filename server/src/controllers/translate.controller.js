@@ -7,8 +7,26 @@ exports.translateText = async (req, res, next) => {
   try {
     const { type, originalText, originalTitle = '', targetLang = 'ko' } = req.body;
 
-    if (!originalText) {
-      return res.status(400).json({ success: false, message: '번역할 텍스트가 입력되지 않았습니다.' });
+    console.log("[디버깅] 백엔드 번역 API 요청 본문:", {
+      type,
+      originalTextLength: originalText ? originalText.length : 0,
+      originalTitleLength: originalTitle ? originalTitle.length : 0,
+      targetLang,
+      body: req.body
+    });
+
+    if (!originalText || originalText.trim() === '') {
+      return res.status(400).json({ 
+        success: false, 
+        message: `번역할 텍스트(originalText)가 입력되지 않았거나 빈 값입니다. (전달받은 데이터: ${JSON.stringify(req.body)})` 
+      });
+    }
+
+    if (!type || (type !== 'post' && type !== 'comment')) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `올바르지 않은 번역 타입(type)입니다. 'post' 또는 'comment'여야 합니다. (전달받은 타입: ${type})` 
+      });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
