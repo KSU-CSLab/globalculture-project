@@ -292,7 +292,7 @@ export function AppProvider({ children }) {
     try {
       let targetPostId = null;
       for (const postId in commentsMap) {
-        if (commentsMap[postId].some((c) => (c.id || c._id) === commentId)) {
+        if (commentsMap[postId].some((c) => String(c.id || c._id) === String(commentId))) {
           targetPostId = postId;
           break;
         }
@@ -303,23 +303,11 @@ export function AppProvider({ children }) {
       const res = await api.deleteComment(targetPostId, commentId);
       if (res.success) {
         const newMap = { ...commentsMap };
-<<<<<<< HEAD
-        newMap[targetPostId] = newMap[targetPostId].filter((c) => (c.id || c._id) !== commentId);
-=======
-        let targetPostId = null;
-        for (const postId in newMap) {
-          const idx = newMap[postId].findIndex((c) => String(c.id || c._id) === String(commentId));
-          if (idx !== -1) {
-            newMap[postId] = newMap[postId].filter((c) => String(c.id || c._id) !== String(commentId));
-            targetPostId = Number(postId);
-            break;
-          }
-        }
->>>>>>> b9ec22e (fix: 댓글 번역 최종 로직 반영)
+        newMap[targetPostId] = newMap[targetPostId].filter((c) => String(c.id || c._id) !== String(commentId));
         setCommentsMap(newMap);
 
         setPosts((p) => p.map((x) =>
-          x.id === targetPostId ? { ...x, commentsCount: Math.max(0, x.commentsCount - 1) } : x
+          String(x.id) === String(targetPostId) ? { ...x, commentsCount: Math.max(0, x.commentsCount - 1) } : x
         ));
         showToast(res.message || '댓글이 삭제되었습니다.', 'success');
       }
