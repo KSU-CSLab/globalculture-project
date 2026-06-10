@@ -48,7 +48,7 @@ const mapBackendPostToFrontend = (post, currentUser) => {
 const mapBackendCommentToFrontend = (comment, currentUser) => {
   const authorId = comment.author?._id || comment.author || 'guest';
   const isSelf = currentUser && (authorId === currentUser.id);
-  
+
   let authorName = '익명';
   if (!comment.isAnonymous) {
     authorName = comment.author?.name || '익명';
@@ -214,12 +214,12 @@ export function AppProvider({ children }) {
             prevPosts.map((p) =>
               p.id === expandedPostId
                 ? {
-                    ...p,
-                    content: detailed.content,
-                    likes: detailed.likes ? detailed.likes.length : 0,
-                    commentsCount: detailed.comments ? detailed.comments.length : 0,
-                    liked: user && detailed.likes ? detailed.likes.includes(user.id) : false,
-                  }
+                  ...p,
+                  content: detailed.content,
+                  likes: detailed.likes ? detailed.likes.length : 0,
+                  commentsCount: detailed.comments ? detailed.comments.length : 0,
+                  liked: user && detailed.likes ? detailed.likes.includes(user.id) : false,
+                }
                 : p
             )
           );
@@ -269,7 +269,8 @@ export function AppProvider({ children }) {
   };
 
   const handleCacheCommentTranslation = (commentId, data) => {
-    setCommentCache((p) => ({ ...p, [commentId]: data }));
+    const stringId = String(commentId);
+    setCommentCache((p) => ({ ...p, [stringId]: data }));
   };
 
   const handlePostDelete = async (postId) => {
@@ -291,7 +292,7 @@ export function AppProvider({ children }) {
     try {
       let targetPostId = null;
       for (const postId in commentsMap) {
-        if (commentsMap[postId].some((c) => (c.id || c._id) === commentId)) {
+        if (commentsMap[postId].some((c) => String(c.id || c._id) === String(commentId))) {
           targetPostId = postId;
           break;
         }
@@ -302,11 +303,11 @@ export function AppProvider({ children }) {
       const res = await api.deleteComment(targetPostId, commentId);
       if (res.success) {
         const newMap = { ...commentsMap };
-        newMap[targetPostId] = newMap[targetPostId].filter((c) => (c.id || c._id) !== commentId);
+        newMap[targetPostId] = newMap[targetPostId].filter((c) => String(c.id || c._id) !== String(commentId));
         setCommentsMap(newMap);
 
         setPosts((p) => p.map((x) =>
-          x.id === targetPostId ? { ...x, commentsCount: Math.max(0, x.commentsCount - 1) } : x
+          String(x.id) === String(targetPostId) ? { ...x, commentsCount: Math.max(0, x.commentsCount - 1) } : x
         ));
         showToast(res.message || '댓글이 삭제되었습니다.', 'success');
       }
@@ -316,32 +317,24 @@ export function AppProvider({ children }) {
     }
   };
 
-  const handleCommentAdd = async (postId, content, isAnonymous) => {
-    try {
-      const userLang = user?.preferredLanguage || 'ko';
-      const res = await api.addComment(postId, {
-        content,
-        lang: userLang,
-        isAnonymous
-      });
-
-      if (res.success && res.comments) {
-        const mappedComments = res.comments.map(c => mapBackendCommentToFrontend(c, user));
-        setCommentsMap(prev => ({
-          ...prev,
-          [postId]: mappedComments
-        }));
-
-        setPosts((prevPosts) => prevPosts.map((x) =>
-          x.id === postId ? { ...x, commentsCount: mappedComments.length } : x
-        ));
-
-        showToast('댓글이 등록되었습니다!');
-      }
-    } catch (err) {
-      console.error('Failed to add comment:', err);
-      showToast('댓글 등록에 실패했습니다.', 'error');
-    }
+  const handleCommentAdd = (postId, content, isAnonymous) => {
+    const newId = Date.now();
+    const newComment = {
+      id: newId,
+      author: isAnonymous
+        ? `익명 ${(commentsMap[postId]?.length || 0) + 1}`
+        : (user?.nickname || '익명'),
+      authorId: user?.id || user?.username || 'guest',
+      isSelf: true,
+      time: '방금 전',
+      content,
+      lang: 'ko',
+      likes: 0,
+    };
+    setCommentCache((p) => ({ ...p, [String(newId)]: { translatedContent: `[Translation from KO] ${content}` } }));
+    setCommentsMap((p) => ({ ...p, [postId]: [...(p[postId] || []), newComment] }));
+    setPosts((p) => p.map((x) => x.id === postId ? { ...x, commentsCount: x.commentsCount + 1 } : x));
+    showToast('댓글이 등록되었습니다!');
   };
 
   const handleLikeToggle = async (postId) => {
