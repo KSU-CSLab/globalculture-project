@@ -12,7 +12,7 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
   const [isTranslated, setIsTranslated] = useState(false);
 
   const menuRef = useRef(null);
-  const commentId = comment.id || comment._id;
+  const commentId = String(comment.id || comment._id);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -30,6 +30,8 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
 
   // Translate toggle handler
   const handleTranslateToggle = async () => {
+    console.log("[디버깅] 현재 댓글 ID:", commentId);
+
     if (isTranslated) {
       setIsTranslated(false);
       return;
@@ -45,6 +47,8 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
       const data = await api.getTranslation('comment', commentId, comment.content);
       onCacheTranslation(commentId, data);
       setIsTranslated(true);
+      const translatedText = data.translatedContent;
+      console.log("[디버깅] 번역된 텍스트 반영 성공:", translatedText);
     } catch (err) {
       console.error("Comment translation error:", err);
       showToast(err.message || "댓글 번역에 실패했습니다. API 키 설정을 확인해 주세요.", "error");
@@ -145,11 +149,10 @@ function CommentItem({ comment, onDelete, onSendMessage, translationCache, onCac
         <button
           onClick={handleTranslateToggle}
           disabled={isTranslating}
-          className={`flex items-center space-x-1 rounded-full px-2.5 py-1 text-xs font-bold transition-all duration-200 select-none ${
-            isTranslated
-              ? 'bg-brand-gold-light dark:bg-brand-gold/10 text-slate-800 dark:text-brand-gold border border-brand-gold/25 hover:bg-brand-gold/15'
-              : 'bg-slate-200/50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
+          className={`flex items-center space-x-1 rounded-full px-2.5 py-1 text-xs font-bold transition-all duration-200 select-none ${isTranslated
+            ? 'bg-brand-gold-light dark:bg-brand-gold/10 text-slate-800 dark:text-brand-gold border border-brand-gold/25 hover:bg-brand-gold/15'
+            : 'bg-slate-200/50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
         >
           {isTranslating ? (
             <>
@@ -210,7 +213,7 @@ export default function CommentSection({
         ) : (
           comments.map((comment) => (
             <CommentItem
-              key={comment.id || comment._id}
+              key={String(comment.id || comment._id)}
               comment={comment}
               onDelete={onDeleteComment}
               onSendMessage={onSendMessage}

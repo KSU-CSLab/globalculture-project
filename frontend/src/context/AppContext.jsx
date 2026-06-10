@@ -48,7 +48,7 @@ const mapBackendPostToFrontend = (post, currentUser) => {
 const mapBackendCommentToFrontend = (comment, currentUser) => {
   const authorId = comment.author?._id || comment.author || 'guest';
   const isSelf = currentUser && (authorId === currentUser.id);
-  
+
   let authorName = '익명';
   if (!comment.isAnonymous) {
     authorName = comment.author?.name || '익명';
@@ -214,12 +214,12 @@ export function AppProvider({ children }) {
             prevPosts.map((p) =>
               p.id === expandedPostId
                 ? {
-                    ...p,
-                    content: detailed.content,
-                    likes: detailed.likes ? detailed.likes.length : 0,
-                    commentsCount: detailed.comments ? detailed.comments.length : 0,
-                    liked: user && detailed.likes ? detailed.likes.includes(user.id) : false,
-                  }
+                  ...p,
+                  content: detailed.content,
+                  likes: detailed.likes ? detailed.likes.length : 0,
+                  commentsCount: detailed.comments ? detailed.comments.length : 0,
+                  liked: user && detailed.likes ? detailed.likes.includes(user.id) : false,
+                }
                 : p
             )
           );
@@ -269,7 +269,8 @@ export function AppProvider({ children }) {
   };
 
   const handleCacheCommentTranslation = (commentId, data) => {
-    setCommentCache((p) => ({ ...p, [commentId]: data }));
+    const stringId = String(commentId);
+    setCommentCache((p) => ({ ...p, [stringId]: data }));
   };
 
   const handlePostDelete = async (postId) => {
@@ -302,7 +303,19 @@ export function AppProvider({ children }) {
       const res = await api.deleteComment(targetPostId, commentId);
       if (res.success) {
         const newMap = { ...commentsMap };
+<<<<<<< HEAD
         newMap[targetPostId] = newMap[targetPostId].filter((c) => (c.id || c._id) !== commentId);
+=======
+        let targetPostId = null;
+        for (const postId in newMap) {
+          const idx = newMap[postId].findIndex((c) => String(c.id || c._id) === String(commentId));
+          if (idx !== -1) {
+            newMap[postId] = newMap[postId].filter((c) => String(c.id || c._id) !== String(commentId));
+            targetPostId = Number(postId);
+            break;
+          }
+        }
+>>>>>>> b9ec22e (fix: 댓글 번역 최종 로직 반영)
         setCommentsMap(newMap);
 
         setPosts((p) => p.map((x) =>
@@ -316,32 +329,24 @@ export function AppProvider({ children }) {
     }
   };
 
-  const handleCommentAdd = async (postId, content, isAnonymous) => {
-    try {
-      const userLang = user?.preferredLanguage || 'ko';
-      const res = await api.addComment(postId, {
-        content,
-        lang: userLang,
-        isAnonymous
-      });
-
-      if (res.success && res.comments) {
-        const mappedComments = res.comments.map(c => mapBackendCommentToFrontend(c, user));
-        setCommentsMap(prev => ({
-          ...prev,
-          [postId]: mappedComments
-        }));
-
-        setPosts((prevPosts) => prevPosts.map((x) =>
-          x.id === postId ? { ...x, commentsCount: mappedComments.length } : x
-        ));
-
-        showToast('댓글이 등록되었습니다!');
-      }
-    } catch (err) {
-      console.error('Failed to add comment:', err);
-      showToast('댓글 등록에 실패했습니다.', 'error');
-    }
+  const handleCommentAdd = (postId, content, isAnonymous) => {
+    const newId = Date.now();
+    const newComment = {
+      id: newId,
+      author: isAnonymous
+        ? `익명 ${(commentsMap[postId]?.length || 0) + 1}`
+        : (user?.nickname || '익명'),
+      authorId: user?.id || user?.username || 'guest',
+      isSelf: true,
+      time: '방금 전',
+      content,
+      lang: 'ko',
+      likes: 0,
+    };
+    setCommentCache((p) => ({ ...p, [String(newId)]: { translatedContent: `[Translation from KO] ${content}` } }));
+    setCommentsMap((p) => ({ ...p, [postId]: [...(p[postId] || []), newComment] }));
+    setPosts((p) => p.map((x) => x.id === postId ? { ...x, commentsCount: x.commentsCount + 1 } : x));
+    showToast('댓글이 등록되었습니다!');
   };
 
   const handleLikeToggle = async (postId) => {
