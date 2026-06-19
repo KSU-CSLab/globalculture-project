@@ -324,19 +324,41 @@ export function useApi() {
     },
 
     // ── TRANSLATE ──
+    // MyMemory 공개 API를 브라우저에서 직접 호출(키 불필요). 백엔드/Render를 거치지 않는다.
     getTranslation: async (type, id, originalText, originalTitle = '') => {
-      const browserLang = navigator.language || 'ko';
-      const { data } = await axiosInstance.post('/translate', {
-        type,
-        originalText,
-        originalTitle,
-        targetLang: browserLang,
-      });
+      // 원본 언어 추정 (한글/한자/베트남어 성조문자/그 외 영어)
+      const detect = (t = '') => {
+        if (/[가-힣]/.test(t)) return 'ko';
+        if (/[一-鿿]/.test(t)) return 'zh';
+        if (/[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/i.test(t)) return 'vi';
+        return 'en';
+      };
+      const mmCode = (c) => ({ zh: 'zh-CN' }[c] || c);
 
-      if (data && data.success && data.data) {
-        return data.data;
-      }
-      throw new Error(data?.message || '번역에 실패했습니다.');
+      const source = detect(originalText || originalTitle);
+      let target = (navigator.language || 'ko').slice(0, 2).toLowerCase();
+      if (!['ko', 'en', 'zh', 'vi'].includes(target)) target = 'ko';
+      if (target === source) target = source === 'ko' ? 'en' : 'ko';
+      const pair = `${mmCode(source)}|${mmCode(target)}`;
+
+      const translate = async (text) => {
+        if (!text || !text.trim()) return text || '';
+        const res = await fetch(
+          `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${pair}`
+        );
+        const j = await res.json();
+        const out = j?.responseData?.translatedText;
+        if (!out || (j.responseStatus && Number(j.responseStatus) >= 400)) {
+          throw new Error(j?.responseDetails || '번역 서비스 응답 오류가 발생했습니다.');
+        }
+        return out;
+      };
+
+      const [translatedContent, translatedTitle] = await Promise.all([
+        translate(originalText),
+        translate(originalTitle),
+      ]);
+      return { translatedTitle, translatedContent };
     },
 
     // ── SIMULATED / LOCAL ACTIONS (without backend endpoints) ──
