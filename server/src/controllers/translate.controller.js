@@ -9,7 +9,7 @@
  * - 모든 예외 분기에서 반드시 res.json()으로 응답을 종료한다.
  */
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 const TIMEOUT_MS = 25000; // Onrender free tier: 25초 타임아웃
 
 /**
