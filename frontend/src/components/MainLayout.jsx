@@ -187,7 +187,7 @@ export default function MainLayout() {
               className="w-full flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-br from-amber-500/10 to-brand-gold/10 hover:from-amber-500/20 hover:to-brand-gold/20 dark:from-slate-950 dark:to-slate-950/80 border border-brand-gold/25 py-2.5 text-xs font-black text-slate-800 dark:text-brand-gold transition-colors"
             >
               <Smartphone size={13} className="text-brand-gold-dark dark:text-brand-gold flex-shrink-0 animate-bounce" />
-              <span>모바일 앱 설치 (APK)</span>
+              <span>모바일에서 보기 (QR)</span>
             </button>
 
             {/* Logout */}

@@ -85,31 +85,22 @@ export default function AuthLayout() {
             ))}
           </div>
 
-          {/* Hybrid App QR Code & Download Section */}
+          {/* Mobile Web QR Code Section — 스캔하면 휴대폰 브라우저에서 바로 열림 */}
           <div className="bg-white/85 dark:bg-slate-900/70 backdrop-blur-md rounded-2xl p-5 border border-brand-gold/30 dark:border-brand-gold/25 shadow-premium flex items-center space-x-4">
             <div className="bg-white p-2 rounded-xl border border-slate-200 dark:border-slate-800 flex-shrink-0 flex items-center justify-center">
               <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&color=0f172a&data=${encodeURIComponent(import.meta.env.VITE_APK_URL || `${window.location.origin}/ksu-culture-hub.apk`)}`}
-                alt="APK QR Code"
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&color=0f172a&data=${encodeURIComponent(window.location.origin)}`}
+                alt="Mobile Web QR Code"
                 className="w-20 h-20 select-none"
                 loading="lazy"
               />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="inline-block bg-brand-gold text-slate-900 text-xs font-black px-1.5 py-0.5 rounded-full mb-1">Android APK</span>
-              <h4 className="text-md font-black text-slate-850 dark:text-white truncate">안드로이드 앱 출시!</h4>
+              <span className="inline-block bg-brand-gold text-slate-900 text-xs font-black px-1.5 py-0.5 rounded-full mb-1">Mobile Web</span>
+              <h4 className="text-md font-black text-slate-850 dark:text-white truncate">휴대폰에서 바로 사용!</h4>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 leading-tight">
-                QR을 스캔하여 모바일 앱을 직접 설치하세요.
+                QR을 스캔하면 휴대폰 브라우저에서 바로 열립니다. 설치가 필요 없어요.
               </p>
-              <div className="flex items-center space-x-2.5 mt-2">
-                <a
-                  href="/ksu-culture-hub.apk"
-                  download="ksu-culture-hub.apk"
-                  className="text-xs font-black text-brand-gold-dark dark:text-brand-gold hover:underline flex items-center"
-                >
-                  APK 직접 다운로드 →
-                </a>
-              </div>
             </div>
           </div>
         </div>

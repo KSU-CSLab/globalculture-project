@@ -18,8 +18,9 @@ export default function AppDownloadModal({ isOpen, onClose, apkUrl }) {
     onClose();
   };
 
-  // Generate QR Code URL
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=0f172a&data=${encodeURIComponent(apkUrl || window.location.origin + '/ksu-culture-hub.apk')}`;
+  // 웹사이트 주소를 QR로 인코딩 — 스캔하면 휴대폰 브라우저에서 바로 열립니다 (설치 불필요)
+  const siteUrl = window.location.origin;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=0f172a&data=${encodeURIComponent(siteUrl)}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
@@ -48,13 +49,13 @@ export default function AppDownloadModal({ isOpen, onClose, apkUrl }) {
             </div>
             <div>
               <span className="inline-block bg-brand-gold/20 text-brand-gold-dark dark:text-brand-gold text-[9px] font-black px-2 py-0.5 rounded-full mb-1 border border-brand-gold/30">
-                Hybrid App Release
+                Mobile Web
               </span>
               <h2 className="text-lg font-black text-slate-850 dark:text-white leading-tight">
-                경성대학교 글로컬 컬쳐 허브 앱 출시!
+                휴대폰에서 바로 사용하세요!
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                하이브리드 앱(APK)을 직접 설치하고 더 빠르고 편리하게 소통하세요.
+                QR을 스캔하면 휴대폰 브라우저에서 바로 열립니다. 설치가 필요 없어요.
               </p>
             </div>
           </div>
@@ -81,14 +82,13 @@ export default function AppDownloadModal({ isOpen, onClose, apkUrl }) {
             <div className="sm:col-span-7 space-y-3.5">
               <h4 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider flex items-center">
                 <Info size={12} className="mr-1 text-brand-gold" />
-                간편 설치 가이드
+                간편 사용 가이드
               </h4>
               <ol className="space-y-2">
                 {[
-                  { step: 1, text: '위 QR 코드를 모바일 카메라로 스캔합니다.' },
-                  { step: 2, text: '"이 파일은 기기에 손상을 줄 수 있습니다" 안내가 떠도 [계속]을 눌러 다운로드를 완료합니다. (정상입니다)' },
-                  { step: 3, text: '받은 APK 파일을 열고 "출처를 알 수 없는 앱 허용"을 켜서 설치합니다.' },
-                  { step: 4, text: 'Play Protect가 물어보면 [자세히] → [무시하고 설치]를 선택하면 됩니다.' }
+                  { step: 1, text: '휴대폰 카메라로 위 QR 코드를 스캔합니다.' },
+                  { step: 2, text: '브라우저가 열리면 학교 이메일(@ks.ac.kr)로 로그인합니다.' },
+                  { step: 3, text: '설치 없이 바로 글로컬 컬쳐 허브를 이용하세요!' }
                 ].map(({ step, text }) => (
                   <li key={step} className="flex items-start text-[11px] font-medium text-slate-650 dark:text-slate-400 leading-relaxed">
                     <span className="flex-shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-brand-gold text-slate-900 text-[9px] font-black mr-2 mt-0.5 shadow-sm">
@@ -99,15 +99,16 @@ export default function AppDownloadModal({ isOpen, onClose, apkUrl }) {
                 ))}
               </ol>
 
-              {/* Direct APK Link */}
+              {/* 웹에서 바로 열기 */}
               <div className="pt-1.5">
                 <a
-                  href={apkUrl || '/ksu-culture-hub.apk'}
-                  download="ksu-culture-hub.apk"
+                  href={siteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-brand-gold dark:text-slate-900 dark:hover:bg-brand-gold-dark text-white text-xs font-black transition-all shadow-md active:scale-[0.98] select-none"
                 >
-                  <Download size={14} className="animate-bounce" />
-                  <span>APK 직접 다운로드 (모바일용)</span>
+                  <ExternalLink size={14} />
+                  <span>웹에서 바로 열기</span>
                 </a>
               </div>
             </div>
@@ -117,7 +118,7 @@ export default function AppDownloadModal({ isOpen, onClose, apkUrl }) {
           <div className="flex items-start space-x-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 p-3 text-[10px] text-amber-700 dark:text-amber-400 font-semibold leading-relaxed">
             <CheckCircle2 size={14} className="flex-shrink-0 text-brand-gold mt-0.5" />
             <span>
-              설치 중 뜨는 "유해한 앱" · "출처 불명" 경고는 Play 스토어 밖에서 설치하는 모든 앱에 안드로이드가 표시하는 <b>정상적인 보안 안내</b>입니다. 본 앱은 경성대학교 글로컬 컬쳐 허브 웹 서비스를 코르도바(Cordova)로 패키징한 것이라 안심하고 설치하셔도 됩니다.
+              <b>설치가 필요 없는 웹 서비스</b>라 어떤 보안 경고도 뜨지 않습니다. QR을 스캔하면 휴대폰 브라우저에서 글로컬 컬쳐 허브가 바로 열리고, PC·모바일 어디서나 동일하게 이용할 수 있습니다.
             </span>
           </div>
         </div>
