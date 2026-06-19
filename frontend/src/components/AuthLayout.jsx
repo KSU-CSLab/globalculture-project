@@ -97,9 +97,9 @@ export default function AuthLayout() {
             </div>
             <div className="flex-1 min-w-0">
               <span className="inline-block bg-brand-gold text-slate-900 text-xs font-black px-1.5 py-0.5 rounded-full mb-1">Mobile Web</span>
-              <h4 className="text-md font-black text-slate-850 dark:text-white truncate">휴대폰에서 바로 사용!</h4>
+              <h4 className="text-md font-black text-slate-850 dark:text-white truncate">안드로이드 앱 출시!</h4>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 leading-tight">
-                QR을 스캔하면 휴대폰 브라우저에서 바로 열립니다. 설치가 필요 없어요.
+                QR을 스캔하여 모바일 앱을 직접 설치하세요.
               </p>
             </div>
           </div>

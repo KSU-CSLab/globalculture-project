@@ -52,10 +52,10 @@ export default function AppDownloadModal({ isOpen, onClose, apkUrl }) {
                 Mobile Web
               </span>
               <h2 className="text-lg font-black text-slate-850 dark:text-white leading-tight">
-                휴대폰에서 바로 사용하세요!
+                안드로이드 앱 출시!
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                QR을 스캔하면 휴대폰 브라우저에서 바로 열립니다. 설치가 필요 없어요.
+                QR을 스캔하여 모바일 앱을 직접 설치하세요.
               </p>
             </div>
           </div>
