@@ -48,14 +48,6 @@ export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForg
     }
   };
 
-  const handleQuickFill = (type) => {
-    setPassword('password123');
-    if (type === 'admin') { setEmail('admin@ks.ac.kr'); }
-    if (type === 'student') { setEmail('student1@ks.ac.kr'); }
-    if (type === 'staff') { setEmail('staff1@ks.ac.kr'); }
-    setError('');
-  };
-
   return (
     <div className="flex-1 flex flex-col justify-center px-4 py-8 select-none fade-in">
       {/* Visual Header */}
@@ -144,28 +136,6 @@ export function LoginView({ onLoginSuccess, onNavigateToSignUp, onNavigateToForg
             )}
           </button>
         </form>
-
-        {/* Quick Demo fills */}
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <span className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 mb-2 text-center uppercase tracking-wider">
-            빠른 데모 계정 (Demo Accounts)
-          </span>
-          <div className="grid grid-cols-3 gap-1.5">
-            {[
-              { key: 'admin', label: '👑 관리자' },
-              { key: 'student', label: '🎓 재학생' },
-              { key: 'staff', label: '🏫 교직원' },
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => handleQuickFill(key)}
-                className="rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[10px] font-bold py-1.5 text-slate-600 dark:text-slate-300 transition-colors"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Nav Links */}
