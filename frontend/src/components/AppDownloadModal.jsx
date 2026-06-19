@@ -4,8 +4,6 @@ import { X, Smartphone, Download, QrCode, Info, ExternalLink, CheckCircle2 } fro
 export default function AppDownloadModal({ isOpen, onClose, apkUrl }) {
   const [dontShowToday, setDontShowToday] = useState(false);
 
-  console.log('AppDownloadModal component render. isOpen:', isOpen);
-
   if (!isOpen) return null;
 
   const handleClose = () => {
@@ -88,8 +86,9 @@ export default function AppDownloadModal({ isOpen, onClose, apkUrl }) {
               <ol className="space-y-2">
                 {[
                   { step: 1, text: '위 QR 코드를 모바일 카메라로 스캔합니다.' },
-                  { step: 2, text: '다운로드된 APK 파일을 실행하여 설치를 시작합니다.' },
-                  { step: 3, text: '경고창이 뜨면 "출처를 알 수 없는 앱 설치 허용"을 선택합니다.' }
+                  { step: 2, text: '"이 파일은 기기에 손상을 줄 수 있습니다" 안내가 떠도 [계속]을 눌러 다운로드를 완료합니다. (정상입니다)' },
+                  { step: 3, text: '받은 APK 파일을 열고 "출처를 알 수 없는 앱 허용"을 켜서 설치합니다.' },
+                  { step: 4, text: 'Play Protect가 물어보면 [자세히] → [무시하고 설치]를 선택하면 됩니다.' }
                 ].map(({ step, text }) => (
                   <li key={step} className="flex items-start text-[11px] font-medium text-slate-650 dark:text-slate-400 leading-relaxed">
                     <span className="flex-shrink-0 flex items-center justify-center w-4 h-4 rounded-full bg-brand-gold text-slate-900 text-[9px] font-black mr-2 mt-0.5 shadow-sm">
@@ -118,7 +117,7 @@ export default function AppDownloadModal({ isOpen, onClose, apkUrl }) {
           <div className="flex items-start space-x-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 p-3 text-[10px] text-amber-700 dark:text-amber-400 font-semibold leading-relaxed">
             <CheckCircle2 size={14} className="flex-shrink-0 text-brand-gold mt-0.5" />
             <span>
-              본 앱은 경성대학교 학생들의 다국어 커뮤니티 활동 및 혜택 제공을 위해 반응형 웹 서비스를 코르도바(Cordova)로 패키징한 하이브리드 앱입니다. 안심하고 설치하셔도 좋습니다!
+              설치 중 뜨는 "유해한 앱" · "출처 불명" 경고는 Play 스토어 밖에서 설치하는 모든 앱에 안드로이드가 표시하는 <b>정상적인 보안 안내</b>입니다. 본 앱은 경성대학교 글로컬 컬쳐 허브 웹 서비스를 코르도바(Cordova)로 패키징한 것이라 안심하고 설치하셔도 됩니다.
             </span>
           </div>
         </div>
